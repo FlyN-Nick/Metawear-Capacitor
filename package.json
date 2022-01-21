@@ -1,7 +1,7 @@
 {
-  "name": "metawear",
+  "name": "metawear-capacitor",
   "version": "0.0.1",
-  "description": "To use metawear's swift sdk.",
+  "description": "Capacitor plugin for metawear's swift sdk.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
@@ -11,7 +11,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "Metawear.podspec"
+    "MetawearCapacitor.podspec"
   ],
   "author": "Nicholas Assaderaghi",
   "license": "MIT",
@@ -37,7 +37,7 @@
     "eslint": "eslint . --ext ts",
     "prettier": "prettier \"**/*.{css,html,ts,js,java}\"",
     "swiftlint": "node-swiftlint",
-    "docgen": "docgen --api metwearPlugin --output-readme README.md --output-json dist/docs.json",
+    "docgen": "docgen --api MetawearCapacitorPlugin --output-readme README.md --output-json dist/docs.json",
     "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.js",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",

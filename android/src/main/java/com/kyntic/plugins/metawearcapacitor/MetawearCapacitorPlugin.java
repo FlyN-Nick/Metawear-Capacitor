@@ -1,4 +1,4 @@
-package com.kyntic.plugins.metawear;
+package com.kyntic.plugins.metawearcapacitor;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -6,10 +6,10 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
-@CapacitorPlugin(name = "metwear")
-public class metwearPlugin extends Plugin {
+@CapacitorPlugin(name = "MetawearCapacitor")
+public class MetawearCapacitorPlugin extends Plugin {
 
-    private metwear implementation = new metwear();
+    private MetawearCapacitor implementation = new MetawearCapacitor();
 
     @PluginMethod
     public void echo(PluginCall call) {

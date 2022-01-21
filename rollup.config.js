@@ -4,7 +4,7 @@ export default {
     {
       file: 'dist/plugin.js',
       format: 'iife',
-      name: 'capacitormetwear',
+      name: 'capacitorMetawearCapacitor',
       globals: {
         '@capacitor/core': 'capacitorExports',
       },

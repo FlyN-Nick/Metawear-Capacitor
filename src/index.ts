@@ -1,10 +1,13 @@
 import { registerPlugin } from '@capacitor/core';
 
-import type { metwearPlugin } from './definitions';
+import type { MetawearCapacitorPlugin } from './definitions';
 
-const metwear = registerPlugin<metwearPlugin>('metwear', {
-  web: () => import('./web').then(m => new m.metwearWeb()),
-});
+const MetawearCapacitor = registerPlugin<MetawearCapacitorPlugin>(
+  'MetawearCapacitor',
+  {
+    web: () => import('./web').then(m => new m.MetawearCapacitorWeb()),
+  },
+);
 
 export * from './definitions';
-export { metwear };
+export { MetawearCapacitor };

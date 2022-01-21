@@ -1,8 +1,8 @@
-package com.kyntic.plugins.metawear;
+package com.kyntic.plugins.metawearcapacitor;
 
 import android.util.Log;
 
-public class metwear {
+public class MetawearCapacitor {
 
     public String echo(String value) {
         Log.i("Echo", value);
