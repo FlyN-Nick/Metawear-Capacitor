@@ -1,5 +1,7 @@
 import Foundation
 import Capacitor
+import MetaWear
+import MetaWear
 
 /**
  * Please read the Capacitor iOS Plugin Development Guide
