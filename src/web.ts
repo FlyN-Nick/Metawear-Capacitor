@@ -5,10 +5,10 @@ import type { MetawearCapacitorPlugin } from './definitions';
 export class MetawearCapacitorWeb
   extends WebPlugin
   implements MetawearCapacitorPlugin {
-  async connect(options: null): Promise<null> {
+  async connect(): Promise<null> {
     throw new Error('Method not implemented.');
   }
-  async disconnect(options: null): Promise<null> {
+  async disconnect(): Promise<null> {
     throw new Error('Method not implemented.');
   }
   async echo(options: { value: string }): Promise<{ value: string }> {
