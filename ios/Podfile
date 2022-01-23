@@ -9,7 +9,7 @@ end
 
 target 'Plugin' do
   capacitor_pods
-  pod "MetaWear", :subspecs => ['UI', 'AsyncUtils', 'DFU']
+  pod "MetaWear", :subspecs => ['UI', 'AsyncUtils', 'Mocks', 'DFU']
   pod "MetaWear"
 end
 
