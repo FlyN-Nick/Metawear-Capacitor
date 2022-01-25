@@ -10,9 +10,14 @@ import MetaWearCpp
 @objc(MetawearCapacitorPlugin)
 public class MetawearCapacitorPlugin: CAPPlugin {
     private let implementation = MetawearCapacitor()
+    
     private var sensor: MetaWear? = nil
+    
     private var accelSignal: OpaquePointer? = nil
-    private var context: UnsafeMutableRawPointer? = nil
+    private var gyroSignal: OpaquePointer? = nil
+    
+    private var accelData: [MblMwCartesianFloat] = []
+    private var gryoData: [MblMwCartesianFloat] = []
 
     // I'll just leave this here for testing.
     @objc func echo(_ call: CAPPluginCall) {
@@ -22,13 +27,23 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         ])
     }
     
+    @objc func connect(_ call: CAPPluginCall) {
+        self.connect()
+        call.resolve()
+    }
+    
     @objc func disconnect(_ call: CAPPluginCall) {
         self.sensor!.cancelConnection()
         call.resolve()
     }
     
-    @objc func connect(_ call: CAPPluginCall) {
-        self.connect()
+    @objc func startAccelData(_ call: CAPPluginCall) {
+        self.startAccelData()
+        call.resolve()
+    }
+    
+    @objc func startGyroData(_ call: CAPPluginCall) {
+        self.startGyroData()
         call.resolve()
     }
     
@@ -62,15 +77,16 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     }
     
     func startAccelData() {
-        //mbl_mw_acc_bosch_set_range(self.sensor!.board, MBL_MW_ACC_BOSCH_RANGE_2G)
-        //mbl_mw_acc_set_odr(self.sensor!.board, 25.0)
-        //mbl_mw_acc_bosch_write_acceleration_config(self.sensor!.board)
-        //let signal = mbl_mw_acc_bosch_get_acceleration_data_signal(self.sensor!.board)!
         let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
         self.accelSignal = signal
         
-        mbl_mw_datasignal_subscribe(signal, self.context) { (context, data) in
+        // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
+        let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        
+        mbl_mw_datasignal_subscribe(signal, observer) { (observer, data) in
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
+            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
+            mySelf.accelData.append(obj)
             print(obj)
         }
         
@@ -79,8 +95,17 @@ public class MetawearCapacitorPlugin: CAPPlugin {
      }
     
     func startGyroData() {
-        //let signal = mbl_mw_gyro
-        //mbl_mw_acc_
-        //mbl_mw_gyro
+        let signal = mbl_mw_gyro_bmi160_get_rotation_data_signal(self.sensor!.board)
+        self.gyroSignal = signal
+        
+        // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
+        let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        
+        mbl_mw_datasignal_subscribe(signal, observer) { observer, data in
+            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
+            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
+            mySelf.gryoData.append(obj)
+            print(obj)
+        }
     }
 }
