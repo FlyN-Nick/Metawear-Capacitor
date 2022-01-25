@@ -10,7 +10,9 @@ import MetaWearCpp
 @objc(MetawearCapacitorPlugin)
 public class MetawearCapacitorPlugin: CAPPlugin {
     private let implementation = MetawearCapacitor()
-    public var sensor: MetaWear? = nil
+    private var sensor: MetaWear? = nil
+    private var accelSignal: OpaquePointer? = nil
+    private var context: UnsafeMutableRawPointer? = nil
 
     // I'll just leave this here for testing.
     @objc func echo(_ call: CAPPluginCall) {
@@ -57,5 +59,28 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 }
             }
         }
+    }
+    
+    func startAccelData() {
+        //mbl_mw_acc_bosch_set_range(self.sensor!.board, MBL_MW_ACC_BOSCH_RANGE_2G)
+        //mbl_mw_acc_set_odr(self.sensor!.board, 25.0)
+        //mbl_mw_acc_bosch_write_acceleration_config(self.sensor!.board)
+        //let signal = mbl_mw_acc_bosch_get_acceleration_data_signal(self.sensor!.board)!
+        let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
+        self.accelSignal = signal
+        
+        mbl_mw_datasignal_subscribe(signal, self.context) { (context, data) in
+            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
+            print(obj)
+        }
+        
+        mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
+        mbl_mw_acc_start(self.sensor!.board)
+     }
+    
+    func startGyroData() {
+        //let signal = mbl_mw_gyro
+        //mbl_mw_acc_
+        //mbl_mw_gyro
     }
 }

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01F71E40279F8ECC00120EC4 /* MetaWearDeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F71E3F279F8ECC00120EC4 /* MetaWearDeviceModel.swift */; };
+		01F71E42279F8F6500120EC4 /* SignalLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F71E41279F8F6500120EC4 /* SignalLevel.swift */; };
 		03FC29A292ACC40490383A1F /* Pods_Plugin.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B2A61DA5A1F2DD4F959604D /* Pods_Plugin.framework */; };
 		20C0B05DCFC8E3958A738AF2 /* Pods_PluginTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6753A823D3815DB436415E3 /* Pods_PluginTests.framework */; };
 		2F98D68224C9AAE500613A4C /* MetawearCapacitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F98D68124C9AAE400613A4C /* MetawearCapacitor.swift */; };
@@ -29,6 +31,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		01F71E3F279F8ECC00120EC4 /* MetaWearDeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetaWearDeviceModel.swift; sourceTree = "<group>"; };
+		01F71E41279F8F6500120EC4 /* SignalLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalLevel.swift; sourceTree = "<group>"; };
 		2F98D68124C9AAE400613A4C /* MetawearCapacitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetawearCapacitor.swift; sourceTree = "<group>"; };
 		3B2A61DA5A1F2DD4F959604D /* Pods_Plugin.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Plugin.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		50ADFF88201F53D600D50D53 /* Plugin.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Plugin.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -97,6 +101,8 @@
 				50ADFF8B201F53D600D50D53 /* MetawearCapacitorPlugin.h */,
 				50ADFFA72020EE4F00D50D53 /* MetawearCapacitorPlugin.m */,
 				50ADFF8C201F53D600D50D53 /* Info.plist */,
+				01F71E3F279F8ECC00120EC4 /* MetaWearDeviceModel.swift */,
+				01F71E41279F8F6500120EC4 /* SignalLevel.swift */,
 			);
 			path = Plugin;
 			sourceTree = "<group>";
@@ -314,9 +320,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01F71E42279F8F6500120EC4 /* SignalLevel.swift in Sources */,
 				50E1A94820377CB70090CE1A /* MetawearCapacitorPlugin.swift in Sources */,
 				2F98D68224C9AAE500613A4C /* MetawearCapacitor.swift in Sources */,
 				50ADFFA82020EE4F00D50D53 /* MetawearCapacitorPlugin.m in Sources */,
+				01F71E40279F8ECC00120EC4 /* MetaWearDeviceModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
