@@ -7,4 +7,10 @@ CAP_PLUGIN(MetawearCapacitorPlugin, "MetawearCapacitor",
            CAP_PLUGIN_METHOD(echo, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(connect, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(disconnect, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(createDataFiles, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(eraseDataFiles, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(connect, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(disconnect, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(startData, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(stopData, CAPPluginReturnPromise);
 )

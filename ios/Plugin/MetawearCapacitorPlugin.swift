@@ -4,8 +4,7 @@ import MetaWear
 import MetaWearCpp
 
 /**
- * Please read the Capacitor iOS Plugin Development Guide
- * here: https://capacitorjs.com/docs/plugins/ios
+    Made by Nicholas Assaderaghi, 2021.
  */
 @objc(MetawearCapacitorPlugin)
 public class MetawearCapacitorPlugin: CAPPlugin {
@@ -16,15 +15,42 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private var accelSignal: OpaquePointer? = nil
     private var gyroSignal: OpaquePointer? = nil
     
-    private var accelData: [MblMwCartesianFloat] = []
-    private var gryoData: [MblMwCartesianFloat] = []
-
+    private var accelStr: String = ""
+    private var gyroStr: String = ""
+    
+    private final var accelFilePath = NSHomeDirectory() + "/accel.txt"
+    private final var gryoFilePath = NSHomeDirectory() + "/gryo.txt"
+    
+    private final var accelFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/accel.txt")
+    private final var gryoFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/gryo.txt")
+    
     // I'll just leave this here for testing.
     @objc func echo(_ call: CAPPluginCall) {
         let value = call.getString("value") ?? ""
         call.resolve([
             "value": implementation.echo(value)
         ])
+    }
+    
+    @objc func createDataFiles(_ call: CAPPluginCall) {
+        FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
+        FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil)
+        call.resolve()
+    }
+    
+    @objc func eraseDataFiles(_ call: CAPPluginCall) {
+        var errored = false
+        do {
+            let text = ""
+            try text.write(toFile: accelFilePath, atomically: false, encoding: String.Encoding.utf8)
+            try text.write(toFile: gryoFilePath, atomically: false, encoding: String.Encoding.utf8)
+        }
+        catch let error {
+            errored = true
+            print(error.localizedDescription)
+            call.reject(error.localizedDescription)
+        }
+        if errored { call.resolve() }
     }
     
     @objc func connect(_ call: CAPPluginCall) {
@@ -37,13 +63,15 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         call.resolve()
     }
     
-    @objc func startAccelData(_ call: CAPPluginCall) {
+    @objc func startData(_ call: CAPPluginCall) {
         self.startAccelData()
+        self.startGyroData()
         call.resolve()
     }
     
-    @objc func startGyroData(_ call: CAPPluginCall) {
-        self.startGyroData()
+    @objc func stopData(_ call: CAPPluginCall) {
+        self.stopAccelData()
+        self.stopGyroData()
         call.resolve()
     }
     
@@ -86,12 +114,15 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_datasignal_subscribe(signal, observer) { (observer, data) in
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
-            mySelf.accelData.append(obj)
-            print(obj)
+            mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
+            print("accel: " + mySelf.accelStr)
+            do {
+                try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
+            }
+            catch let error {
+                print(error.localizedDescription)
+            }
         }
-        
-        mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
-        mbl_mw_acc_start(self.sensor!.board)
      }
     
     func startGyroData() {
@@ -104,8 +135,48 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_datasignal_subscribe(signal, observer) { observer, data in
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
-            mySelf.gryoData.append(obj)
-            print(obj)
+            mySelf.gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
+            print("gyro: " + mySelf.gyroStr)
+            do {
+                try mySelf.gyroStr.appendToURL(fileURL: mySelf.gryoFileURL)
+            }
+            catch let error {
+                print(error.localizedDescription)
+            }
         }
     }
+    
+    func stopAccelData() {
+        mbl_mw_acc_stop(self.sensor!.board)
+        mbl_mw_acc_disable_acceleration_sampling(self.sensor!.board)
+        mbl_mw_datasignal_unsubscribe(self.accelSignal!)
+    }
+    
+    func stopGyroData() {
+        mbl_mw_gyro_bmi160_stop(self.sensor!.board)
+        mbl_mw_gyro_bmi160_disable_rotation_sampling(self.sensor!.board)
+        mbl_mw_datasignal_unsubscribe(self.gyroSignal!)
+    }
+}
+
+extension String {
+    func appendToURL(fileURL: URL) throws {
+        let data = self.data(using: String.Encoding.utf8)!
+        try data.append(fileURL: fileURL)
+    }
+ }
+
+extension Data {
+  func append(fileURL: URL) throws {
+      if let fileHandle = FileHandle(forWritingAtPath: fileURL.path) {
+          defer {
+              fileHandle.closeFile()
+          }
+          fileHandle.seekToEndOfFile()
+          fileHandle.write(self)
+      }
+      else {
+          try write(to: fileURL, options: .atomic)
+      }
+  }
 }
