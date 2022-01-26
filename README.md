@@ -16,6 +16,10 @@ npx cap sync
 * [`echo(...)`](#echo)
 * [`connect()`](#connect)
 * [`disconnect()`](#disconnect)
+* [`createDataFiles()`](#createdatafiles)
+* [`eraseDataFiles()`](#erasedatafiles)
+* [`startData()`](#startdata)
+* [`stopData()`](#stopdata)
 
 </docgen-index>
 
@@ -52,6 +56,50 @@ connect() => Promise<null>
 
 ```typescript
 disconnect() => Promise<null>
+```
+
+**Returns:** <code>Promise&lt;null&gt;</code>
+
+--------------------
+
+
+### createDataFiles()
+
+```typescript
+createDataFiles() => Promise<null>
+```
+
+**Returns:** <code>Promise&lt;null&gt;</code>
+
+--------------------
+
+
+### eraseDataFiles()
+
+```typescript
+eraseDataFiles() => Promise<null>
+```
+
+**Returns:** <code>Promise&lt;null&gt;</code>
+
+--------------------
+
+
+### startData()
+
+```typescript
+startData() => Promise<null>
+```
+
+**Returns:** <code>Promise&lt;null&gt;</code>
+
+--------------------
+
+
+### stopData()
+
+```typescript
+stopData() => Promise<null>
 ```
 
 **Returns:** <code>Promise&lt;null&gt;</code>
