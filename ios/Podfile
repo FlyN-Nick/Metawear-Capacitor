@@ -1,4 +1,4 @@
-platform :ios, '12.0'
+platform :ios, '14.0'
 
 def capacitor_pods
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
@@ -7,12 +7,18 @@ def capacitor_pods
   pod 'CapacitorCordova', :path => '../node_modules/@capacitor/ios'
 end
 
-target 'Plugin' do
-  capacitor_pods
+def metawear_pods
+  use_frameworks!
   pod "MetaWear", :subspecs => ['UI', 'AsyncUtils', 'Mocks', 'DFU']
   pod "MetaWear"
 end
 
+target 'Plugin' do
+  capacitor_pods
+  metawear_pods
+end
+
 target 'PluginTests' do
   capacitor_pods
+  metawear_pods
 end
