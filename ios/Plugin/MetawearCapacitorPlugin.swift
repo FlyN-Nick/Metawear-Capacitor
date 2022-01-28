@@ -47,29 +47,34 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         }
         catch let error {
             errored = true
+            print("Error while erasing data files: ")
             print(error.localizedDescription)
             call.reject(error.localizedDescription)
         }
-        if errored { call.resolve() }
+        if !errored { call.resolve() }
     }
     
     @objc func connect(_ call: CAPPluginCall) {
+        print("Connect called.")
         self.connect()
         call.resolve()
     }
     
     @objc func disconnect(_ call: CAPPluginCall) {
+        print("Disconnect called.")
         self.sensor!.cancelConnection()
         call.resolve()
     }
     
     @objc func startData(_ call: CAPPluginCall) {
+        print("StartData called.")
         self.startAccelData()
         self.startGyroData()
         call.resolve()
     }
     
     @objc func stopData(_ call: CAPPluginCall) {
+        print("StopData called.")
         self.stopAccelData()
         self.stopGyroData()
         call.resolve()
@@ -86,9 +91,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 device.connectAndSetup().continueWith { t in
                     if let error = t.error {
                         // Sorry we couldn't connect
+                        print("Device found, but could not be connected to: ")
                         print(error)
                         self.notifyListeners("unsuccessfulConnection", data: ["error": error])
                     } else {
+                        print("Device successfully connected to!")
                         self.sensor = device // so we can use it in the future
                         self.notifyListeners("successfulConnection", data: nil)
                         
@@ -100,6 +107,10 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                         mbl_mw_led_play(device.board)
                     }
                 }
+            }
+            else
+            {
+                print("Device connection too weak, rrsi = " + String(device.rssi))
             }
         }
     }
@@ -120,6 +131,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
             }
             catch let error {
+                print("Error while appending to accel data file: ")
                 print(error.localizedDescription)
             }
         }
@@ -141,6 +153,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 try mySelf.gyroStr.appendToURL(fileURL: mySelf.gryoFileURL)
             }
             catch let error {
+                print("Error while appending to gryo data file: ")
                 print(error.localizedDescription)
             }
         }
