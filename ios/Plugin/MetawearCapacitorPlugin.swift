@@ -30,6 +30,21 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     @objc func createDataFiles(_ call: CAPPluginCall) {
         var unsuccessful = !FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
         unsuccessful = !FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil) ||  unsuccessful
+        
+        do {
+            let data = "test".data(using: String.Encoding.utf8)
+            print("data:")
+            print(data as Any)
+            try data!.write(to: self.gryoFileURL)
+            try data!.write(to: self.accelFileURL)
+            try "".appendToURL(fileURL: self.accelFileURL)
+            try "".appendToURL(fileURL: self.gryoFileURL)
+        }
+        catch let error {
+            print("Error while trying to write to files: ")
+            print(error.localizedDescription)
+        }
+        
         call.resolve(["successful": !unsuccessful])
     }
     
@@ -191,6 +206,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
 
 extension String {
     func appendToURL(fileURL: URL) throws {
+        print("Appending to URL!")
         let data = self.data(using: String.Encoding.utf8)!
         try data.append(fileURL: fileURL)
     }
@@ -198,7 +214,9 @@ extension String {
 
 extension Data {
   func append(fileURL: URL) throws {
+      print("data.append called!")
       if let fileHandle = FileHandle(forWritingAtPath: fileURL.path) {
+          print("using filehandle!")
           defer {
               fileHandle.closeFile()
           }
@@ -206,6 +224,7 @@ extension Data {
           fileHandle.write(self)
       }
       else {
+          print("using write!")
           try write(to: fileURL, options: .atomic)
       }
   }
