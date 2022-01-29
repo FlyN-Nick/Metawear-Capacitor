@@ -8,7 +8,6 @@ import MetaWearCpp
  */
 @objc(MetawearCapacitorPlugin)
 public class MetawearCapacitorPlugin: CAPPlugin {
-    private let implementation = MetawearCapacitor()
     
     private var sensor: MetaWear? = nil
     
@@ -24,18 +23,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private final var accelFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/accel.txt")
     private final var gryoFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/gryo.txt")
     
-    // I'll just leave this here for testing.
-    @objc func echo(_ call: CAPPluginCall) {
-        let value = call.getString("value") ?? ""
-        call.resolve([
-            "value": implementation.echo(value)
-        ])
-    }
+    private var accelDataReceived = false
+    private var gryoDataReceived = false
+    
     
     @objc func createDataFiles(_ call: CAPPluginCall) {
-        FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
-        FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil)
-        call.resolve()
+        var unsuccessful = !FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
+        unsuccessful = !FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil) ||  unsuccessful
+        call.resolve(["successful": !unsuccessful])
     }
     
     @objc func eraseDataFiles(_ call: CAPPluginCall) {
@@ -81,7 +76,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     }
     
     func connect() {
-        if sensor != nil { return }
+        if sensor != nil
+        {
+            self.notifyListeners("successfulConnection", data: nil)
+            return
+        }
         MetaWearScanner.shared.startScan(allowDuplicates: true) { (device) in
             // We found a MetaWear board, see if it is close
             if device.rssi > -50 {
@@ -134,6 +133,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 print("Error while appending to accel data file: ")
                 print(error.localizedDescription)
             }
+            if !mySelf.accelDataReceived
+            {
+                mySelf.accelDataReceived = true
+                if (mySelf.gryoDataReceived)
+                {
+                    mySelf.notifyListeners("dataReceived", data: nil)
+                }
+            }
         }
      }
     
@@ -156,6 +163,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 print("Error while appending to gryo data file: ")
                 print(error.localizedDescription)
             }
+            if !mySelf.gryoDataReceived
+            {
+                mySelf.gryoDataReceived = true
+                if (mySelf.accelDataReceived)
+                {
+                    mySelf.notifyListeners("dataReceived", data: nil)
+                }
+            }
         }
     }
     
@@ -163,12 +178,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_acc_stop(self.sensor!.board)
         mbl_mw_acc_disable_acceleration_sampling(self.sensor!.board)
         mbl_mw_datasignal_unsubscribe(self.accelSignal!)
+        self.accelDataReceived = false
     }
     
     func stopGyroData() {
         mbl_mw_gyro_bmi160_stop(self.sensor!.board)
         mbl_mw_gyro_bmi160_disable_rotation_sampling(self.sensor!.board)
         mbl_mw_datasignal_unsubscribe(self.gyroSignal!)
+        self.gryoDataReceived = false
     }
 }
 
