@@ -53,16 +53,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         // this says we don't have the permission to save the file in the folder
         do {
             let data = "".data(using: String.Encoding.utf8)
-            try data!.write(to: self.gryoFileURL)
-            try data!.write(to: self.accelFileURL)
+            try data!.write(to: documentsURL.appendingPathComponent("accel.txt"))
+            try data!.write(to: documentsURL.appendingPathComponent("gryo.txt"))
         }
         catch let error {
             print("Swift: Error while trying to write to files: ")
             print(error.localizedDescription)
         }
         
-        print(accelFileURL.absoluteString)
-        print(documentsURL.appendingPathComponent("accel.txt").absoluteString)
 
 //        // this tries to write to system, unsuccessfully of course
 //        do {
