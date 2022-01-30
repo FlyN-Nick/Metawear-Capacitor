@@ -20,6 +20,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private final var accelFilePath = NSHomeDirectory() + "data/accel.txt"
     private final var gryoFilePath = NSHomeDirectory() + "data/gryo.txt"
     
+    private final var dataFolderPath = NSHomeDirectory() + "data/"
+    
     private final var accelFileURL = URL(fileURLWithPath: NSHomeDirectory() + "data/accel.txt")
     private final var gryoFileURL = URL(fileURLWithPath: NSHomeDirectory() + "data/gryo.txt")
     
@@ -28,15 +30,18 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     
     @objc func createDataFiles(_ call: CAPPluginCall) {
+        //FileManager.default.createDirectory(
         var unsuccessful = !FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
         unsuccessful = !FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil) ||  unsuccessful
+        print("Swift: success of creating data files:")
+        print(!unsuccessful)
         
         do {
-            try "".appendToURL(fileURL: self.accelFileURL)
-            try "".appendToURL(fileURL: self.gryoFileURL)
+            print("Swift: trying to create data directory.")
+            try FileManager.default.createDirectory(atPath: dataFolderPath, withIntermediateDirectories: true)
         }
         catch let error {
-            print("Swift: Error while trying to write to files: ")
+            print("Swift: Error while trying to create directory: ")
             print(error.localizedDescription)
         }
         
