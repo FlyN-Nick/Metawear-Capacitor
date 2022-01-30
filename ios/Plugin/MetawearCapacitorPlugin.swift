@@ -151,13 +151,18 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     }
     
     func startAccelData() {
+        print("Swift: sensor.board:")
+        print(self.sensor!.board as Any)
         let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
         self.accelSignal = signal
+        print("Swift: accel signal:")
+        print(signal as Any)
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         
         mbl_mw_datasignal_subscribe(signal, observer) { (observer, data) in
+            print("Swift: received accel data from sensor.")
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
             mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
@@ -181,13 +186,18 @@ public class MetawearCapacitorPlugin: CAPPlugin {
      }
     
     func startGyroData() {
+        print("Swift: sensor.board:")
+        print(self.sensor!.board as Any)
         let signal = mbl_mw_gyro_bmi160_get_rotation_data_signal(self.sensor!.board)
         self.gyroSignal = signal
+        print("Swift: gyro signal:")
+        print(signal as Any)
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         
         mbl_mw_datasignal_subscribe(signal, observer) { observer, data in
+            print("Swift: received gyro data from sensor.")
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
             mySelf.gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
