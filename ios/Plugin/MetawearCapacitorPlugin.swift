@@ -162,7 +162,6 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         
         mbl_mw_datasignal_subscribe(signal, observer) { (observer, data) in
-            print("Swift: received accel data from sensor.")
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
             mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
@@ -176,6 +175,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             }
             if !mySelf.accelDataReceived
             {
+                print("Swift: received accel data from sensor!")
                 mySelf.accelDataReceived = true
                 if (mySelf.gryoDataReceived)
                 {
@@ -183,6 +183,9 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 }
             }
         }
+        mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
+        mbl_mw_acc_start(self.sensor!.board)
+        mbl_mw_datasignal_read(signal)
      }
     
     func startGyroData() {
@@ -197,7 +200,6 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         
         mbl_mw_datasignal_subscribe(signal, observer) { observer, data in
-            print("Swift: received gyro data from sensor.")
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
             mySelf.gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
@@ -211,6 +213,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             }
             if !mySelf.gryoDataReceived
             {
+                print("Swift: received accel data from sensor!")
                 mySelf.gryoDataReceived = true
                 if (mySelf.accelDataReceived)
                 {
@@ -218,6 +221,9 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 }
             }
         }
+        mbl_mw_gyro_bmi160_enable_rotation_sampling(self.sensor!.board)
+        mbl_mw_gyro_bmi160_start(self.sensor!.board)
+        mbl_mw_datasignal_read(signal)
     }
     
     func stopAccelData() {
