@@ -28,6 +28,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private var accelDataReceived = false
     private var gryoDataReceived = false
     
+    private final let documentsURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    
     
     @objc func createDataFiles(_ call: CAPPluginCall) {
         //NSSearchPathForDirectoriesInDomains()
@@ -59,6 +61,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             print(error.localizedDescription)
         }
         
+        print(documentsURL.absoluteString)
+        print(documentsURL.relativeString)
+        print(documentsURL.appendingPathComponent("/accel.txt").absoluteString)
+        print(documentsURL.appendingPathComponent("/accel.txt").relativeString)
+
 //        // this tries to write to system, unsuccessfully of course
 //        do {
 //            let data = "test".data(using: String.Encoding.utf8)
