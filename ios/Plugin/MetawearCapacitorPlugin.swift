@@ -17,11 +17,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private var accelStr: String = ""
     private var gyroStr: String = ""
     
-    private final var accelFilePath = NSHomeDirectory() + "/accel.txt"
-    private final var gryoFilePath = NSHomeDirectory() + "/gryo.txt"
+    private final var accelFilePath = NSHomeDirectory() + "data/accel.txt"
+    private final var gryoFilePath = NSHomeDirectory() + "data/gryo.txt"
     
-    private final var accelFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/accel.txt")
-    private final var gryoFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/gryo.txt")
+    private final var accelFileURL = URL(fileURLWithPath: NSHomeDirectory() + "data/accel.txt")
+    private final var gryoFileURL = URL(fileURLWithPath: NSHomeDirectory() + "data/gryo.txt")
     
     private var accelDataReceived = false
     private var gryoDataReceived = false
@@ -32,16 +32,23 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         unsuccessful = !FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil) ||  unsuccessful
         
         do {
-            let data = "test".data(using: String.Encoding.utf8)
-            print("data:")
-            print(data as Any)
-            try data!.write(to: self.gryoFileURL)
-            try data!.write(to: self.accelFileURL)
             try "".appendToURL(fileURL: self.accelFileURL)
             try "".appendToURL(fileURL: self.gryoFileURL)
         }
         catch let error {
-            print("Error while trying to write to files: ")
+            print("Swift: Error while trying to write to files: ")
+            print(error.localizedDescription)
+        }
+        
+        do {
+            let data = "test".data(using: String.Encoding.utf8)
+            print("Swift: data:")
+            print(data as Any)
+            try data!.write(to: self.gryoFileURL)
+            try data!.write(to: self.accelFileURL)
+        }
+        catch let error {
+            print("Swift: Error while trying to write to files: ")
             print(error.localizedDescription)
         }
         
@@ -57,7 +64,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         }
         catch let error {
             errored = true
-            print("Error while erasing data files: ")
+            print("Swift: Error while erasing data files: ")
             print(error.localizedDescription)
             call.reject(error.localizedDescription)
         }
@@ -65,26 +72,26 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     }
     
     @objc func connect(_ call: CAPPluginCall) {
-        print("Connect called.")
+        print("Swift: Connect called.")
         self.connect()
         call.resolve()
     }
     
     @objc func disconnect(_ call: CAPPluginCall) {
-        print("Disconnect called.")
+        print("Swift: Disconnect called.")
         self.sensor!.cancelConnection()
         call.resolve()
     }
     
     @objc func startData(_ call: CAPPluginCall) {
-        print("StartData called.")
+        print("Swift: StartData called.")
         self.startAccelData()
         self.startGyroData()
         call.resolve()
     }
     
     @objc func stopData(_ call: CAPPluginCall) {
-        print("StopData called.")
+        print("Swift: StopData called.")
         self.stopAccelData()
         self.stopGyroData()
         call.resolve()
@@ -98,33 +105,27 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         }
         MetaWearScanner.shared.startScan(allowDuplicates: true) { (device) in
             // We found a MetaWear board, see if it is close
-            if device.rssi > -50 {
-                // Hooray! We found a MetaWear board, so stop scanning for more
-                MetaWearScanner.shared.stopScan()
-                // Connect to the board we found
-                device.connectAndSetup().continueWith { t in
-                    if let error = t.error {
-                        // Sorry we couldn't connect
-                        print("Device found, but could not be connected to: ")
-                        print(error)
-                        self.notifyListeners("unsuccessfulConnection", data: ["error": error])
-                    } else {
-                        print("Device successfully connected to!")
-                        self.sensor = device // so we can use it in the future
-                        self.notifyListeners("successfulConnection", data: nil)
-                        
-                        // Hooray! We connected to a MetaWear board, so flash its LED!
-                        var pattern = MblMwLedPattern()
-                        mbl_mw_led_load_preset_pattern(&pattern, MBL_MW_LED_PRESET_PULSE)
-                        mbl_mw_led_stop_and_clear(device.board)
-                        mbl_mw_led_write_pattern(device.board, &pattern, MBL_MW_LED_COLOR_GREEN)
-                        mbl_mw_led_play(device.board)
-                    }
+            // Hooray! We found a MetaWear board, so stop scanning for more
+            MetaWearScanner.shared.stopScan()
+            // Connect to the board we found
+            device.connectAndSetup().continueWith { t in
+                if let error = t.error {
+                    // Sorry we couldn't connect
+                    print("Swift: Device found, but could not be connected to: ")
+                    print(error)
+                    self.notifyListeners("unsuccessfulConnection", data: ["error": error])
+                } else {
+                    print("Swift: Device successfully connected to!")
+                    self.sensor = device // so we can use it in the future
+                    self.notifyListeners("successfulConnection", data: nil)
+                    
+                    // Hooray! We connected to a MetaWear board, so flash its LED!
+                    var pattern = MblMwLedPattern()
+                    mbl_mw_led_load_preset_pattern(&pattern, MBL_MW_LED_PRESET_PULSE)
+                    mbl_mw_led_stop_and_clear(device.board)
+                    mbl_mw_led_write_pattern(device.board, &pattern, MBL_MW_LED_COLOR_GREEN)
+                    mbl_mw_led_play(device.board)
                 }
-            }
-            else
-            {
-                print("Device connection too weak, rrsi = " + String(device.rssi))
             }
         }
     }
@@ -140,12 +141,12 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
             mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
-            print("accel: " + mySelf.accelStr)
+            print("Swift: accel: " + mySelf.accelStr)
             do {
                 try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
             }
             catch let error {
-                print("Error while appending to accel data file: ")
+                print("Swift: Error while appending to accel data file: ")
                 print(error.localizedDescription)
             }
             if !mySelf.accelDataReceived
@@ -170,12 +171,12 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
             mySelf.gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
-            print("gyro: " + mySelf.gyroStr)
+            print("Swift: gyro: " + mySelf.gyroStr)
             do {
                 try mySelf.gyroStr.appendToURL(fileURL: mySelf.gryoFileURL)
             }
             catch let error {
-                print("Error while appending to gryo data file: ")
+                print("Swift: Error while appending to gryo data file: ")
                 print(error.localizedDescription)
             }
             if !mySelf.gryoDataReceived
@@ -206,7 +207,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
 
 extension String {
     func appendToURL(fileURL: URL) throws {
-        print("Appending to URL!")
+        print("Swift: Appending to URL!")
         let data = self.data(using: String.Encoding.utf8)!
         try data.append(fileURL: fileURL)
     }
@@ -214,9 +215,9 @@ extension String {
 
 extension Data {
   func append(fileURL: URL) throws {
-      print("data.append called!")
+      print("Swift: data.append called!")
       if let fileHandle = FileHandle(forWritingAtPath: fileURL.path) {
-          print("using filehandle!")
+          print("Swift: using filehandle!")
           defer {
               fileHandle.closeFile()
           }
@@ -224,7 +225,7 @@ extension Data {
           fileHandle.write(self)
       }
       else {
-          print("using write!")
+          print("Swift: using write!")
           try write(to: fileURL, options: .atomic)
       }
   }
