@@ -17,28 +17,23 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private var accelStr: String = ""
     private var gyroStr: String = ""
     
-    private final var accelFilePath = NSHomeDirectory() + "/accel.txt"
-    private final var gryoFilePath = NSHomeDirectory() + "/gryo.txt"
-    
-    private final var dataFolderPath = NSHomeDirectory()
-    
-    private final var accelFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/accel.txt")
-    private final var gryoFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/gryo.txt")
     
     private var accelDataReceived = false
     private var gryoDataReceived = false
     
-    private final let documentsURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    private final let gryoFileURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("gryo.txt")
+    private final let accelFileURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("accel.txt")
+    private final var dataFolderPath = NSHomeDirectory()
     
     
     @objc func createDataFiles(_ call: CAPPluginCall) {
         //NSSearchPathForDirectoriesInDomains()
         
         // this currently is unsuccessful
-        var unsuccessful = !FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
-        unsuccessful = !FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil) ||  unsuccessful
-        print("Swift: success of creating data files:")
-        print(!unsuccessful)
+//        var unsuccessful = !FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
+//        unsuccessful = !FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil) ||  unsuccessful
+//        print("Swift: success of creating data files:")
+//        print(!unsuccessful)
         
         // this successfully creates the directory
         do {
@@ -50,15 +45,17 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             print(error.localizedDescription)
         }
         
-        // this says we don't have the permission to save the file in the folder
+        // it isn't erroring right now :D
         do {
-            let data = "".data(using: String.Encoding.utf8)
-            try data!.write(to: documentsURL.appendingPathComponent("accel.txt"))
-            try data!.write(to: documentsURL.appendingPathComponent("gryo.txt"))
+            let data = "DATA: ".data(using: String.Encoding.utf8)
+            try data!.write(to: self.accelFileURL)
+            try data!.write(to: self.gryoFileURL)
+            call.resolve(["successful": true])
         }
         catch let error {
             print("Swift: Error while trying to write to files: ")
             print(error.localizedDescription)
+            call.resolve(["successful": false])
         }
         
 
@@ -75,15 +72,15 @@ public class MetawearCapacitorPlugin: CAPPlugin {
 //            print(error.localizedDescription)
 //        }
         
-        call.resolve(["successful": !unsuccessful])
+//        call.resolve(["successful": !unsuccessful])
     }
     
     @objc func eraseDataFiles(_ call: CAPPluginCall) {
         var errored = false
         do {
             let text = ""
-            try text.write(toFile: accelFilePath, atomically: false, encoding: String.Encoding.utf8)
-            try text.write(toFile: gryoFilePath, atomically: false, encoding: String.Encoding.utf8)
+            try text.write(to: self.accelFileURL, atomically: false, encoding: String.Encoding.utf8)
+            try text.write(to: self.gryoFileURL, atomically: false, encoding: String.Encoding.utf8)
         }
         catch let error {
             errored = true
