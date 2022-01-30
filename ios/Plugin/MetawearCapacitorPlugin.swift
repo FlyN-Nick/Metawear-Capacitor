@@ -61,10 +61,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             print(error.localizedDescription)
         }
         
-        print(documentsURL.absoluteString)
-        print(documentsURL.relativeString)
-        print(documentsURL.appendingPathComponent("/accel.txt").absoluteString)
-        print(documentsURL.appendingPathComponent("/accel.txt").relativeString)
+        print(accelFileURL.absoluteString)
+        print(documentsURL.appendingPathComponent("accel.txt").absoluteString)
 
 //        // this tries to write to system, unsuccessfully of course
 //        do {
