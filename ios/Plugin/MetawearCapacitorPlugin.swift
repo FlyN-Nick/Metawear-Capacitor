@@ -50,7 +50,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         
         // this says we don't have the permission to save the file in the folder
         do {
-            let data = "test".data(using: String.Encoding.utf8)
+            let data = "".data(using: String.Encoding.utf8)
             print("Swift: data:")
             print(data as Any)
             try data!.write(to: self.gryoFileURL)
@@ -61,18 +61,18 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             print(error.localizedDescription)
         }
         
-        // this is unknown
-        do {
-            let data = "test".data(using: String.Encoding.utf8)
-            print("Swift: data:")
-            print(data as Any)
-            try data!.write(to: URL(fileURLWithPath: "/gryo.txt"))
-            try data!.write(to: URL(fileURLWithPath: "/accel.txt"))
-        }
-        catch let error {
-            print("Swift: Error while hail mary: ")
-            print(error.localizedDescription)
-        }
+//        // this tries to write to system, unsuccessfully of course
+//        do {
+//            let data = "test".data(using: String.Encoding.utf8)
+//            print("Swift: data:")
+//            print(data as Any)
+//            try data!.write(to: URL(fileURLWithPath: "/gryo.txt"))
+//            try data!.write(to: URL(fileURLWithPath: "/accel.txt"))
+//        }
+//        catch let error {
+//            print("Swift: Error while hail mary: ")
+//            print(error.localizedDescription)
+//        }
         
         call.resolve(["successful": !unsuccessful])
     }
