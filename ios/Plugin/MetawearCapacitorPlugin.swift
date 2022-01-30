@@ -17,13 +17,13 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private var accelStr: String = ""
     private var gyroStr: String = ""
     
-    private final var accelFilePath = NSHomeDirectory() + "/data/accel.txt"
-    private final var gryoFilePath = NSHomeDirectory() + "/data/gryo.txt"
+    private final var accelFilePath = NSHomeDirectory() + "/accel.txt"
+    private final var gryoFilePath = NSHomeDirectory() + "/gryo.txt"
     
-    private final var dataFolderPath = NSHomeDirectory() + "/data"
+    private final var dataFolderPath = NSHomeDirectory()
     
-    private final var accelFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/data/accel.txt")
-    private final var gryoFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/data/gryo.txt")
+    private final var accelFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/accel.txt")
+    private final var gryoFileURL = URL(fileURLWithPath: NSHomeDirectory() + "/gryo.txt")
     
     private var accelDataReceived = false
     private var gryoDataReceived = false
@@ -31,11 +31,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     @objc func createDataFiles(_ call: CAPPluginCall) {
         //NSSearchPathForDirectoriesInDomains()
+        
+        // this currently is unsuccessful
         var unsuccessful = !FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
         unsuccessful = !FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil) ||  unsuccessful
         print("Swift: success of creating data files:")
         print(!unsuccessful)
         
+        // this successfully creates the directory
         do {
             print("Swift: trying to create data directory.")
             try FileManager.default.createDirectory(atPath: dataFolderPath, withIntermediateDirectories: true)
@@ -45,6 +48,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             print(error.localizedDescription)
         }
         
+        // this says we don't have the permission to save the file in the folder
         do {
             let data = "test".data(using: String.Encoding.utf8)
             print("Swift: data:")
@@ -54,6 +58,19 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         }
         catch let error {
             print("Swift: Error while trying to write to files: ")
+            print(error.localizedDescription)
+        }
+        
+        // this is unknown
+        do {
+            let data = "test".data(using: String.Encoding.utf8)
+            print("Swift: data:")
+            print(data as Any)
+            try data!.write(to: URL(fileURLWithPath: "/gryo.txt"))
+            try data!.write(to: URL(fileURLWithPath: "/accel.txt"))
+        }
+        catch let error {
+            print("Swift: Error while hail mary: ")
             print(error.localizedDescription)
         }
         
