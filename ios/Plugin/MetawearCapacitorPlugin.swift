@@ -176,16 +176,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         }
         mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
         mbl_mw_acc_start(self.sensor!.board)
-        mbl_mw_datasignal_read(signal)
      }
     
     func startGyroData() {
-        print("Swift: sensor.board:")
-        print(self.sensor!.board as Any)
         let signal = mbl_mw_gyro_bmi160_get_rotation_data_signal(self.sensor!.board)
         self.gyroSignal = signal
-        print("Swift: gyro signal:")
-        print(signal as Any)
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
@@ -217,7 +212,6 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         }
         mbl_mw_gyro_bmi160_enable_rotation_sampling(self.sensor!.board)
         mbl_mw_gyro_bmi160_start(self.sensor!.board)
-        mbl_mw_datasignal_read(signal)
     }
     
     func stopAccelData() {
