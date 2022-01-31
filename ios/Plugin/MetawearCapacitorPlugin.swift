@@ -162,13 +162,13 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         print(signal as Any)
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
-//        let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-//
-//        mbl_mw_datasignal_subscribe(signal, observer) { (observer, data) in
-//            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
-//            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
-//            mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
-//            print("Swift: accel: " + mySelf.accelStr)
+        let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        self.accelData.clearStreamed(newKind: .cartesianXYZ)
+        mbl_mw_datasignal_subscribe(self.accelSignal, observer) { (observer, data) in
+            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
+            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
+            mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
+            print("Swift: accel: " + mySelf.accelStr)
 //            do {
 //                try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
 //            }
@@ -185,21 +185,12 @@ public class MetawearCapacitorPlugin: CAPPlugin {
 //                    mySelf.notifyListeners("dataReceived", data: nil)
 //                }
 //            }
-//        }
-//        mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
-//        mbl_mw_acc_start(self.sensor!.board)
-//        mbl_mw_datasignal_read(signal)
-        self.accelData.clearStreamed(newKind: .cartesianXYZ)
-        mbl_mw_datasignal_subscribe(signal, Unmanaged.passUnretained(self).toOpaque()) { (context, obj) in
-            let acceleration: MblMwCartesianFloat = obj!.pointee.valueAs()
-            let _self: MetawearCapacitorPlugin = Unmanaged.fromOpaque(context!).takeUnretainedValue()
-            _self.accelStr = String(format:"(%f,%f,%f),", acceleration.x, acceleration.y, acceleration.z)
-            print("Swift: acel: " + _self.gyroStr)
-            let point = (obj!.pointee.epoch, acceleration)
-            _self.accelData.stream.append(.init(cartesian: point))
+//            let point = (data!.pointee.epoch, obj)
+//            mySelf.accelData.stream.append(.init(cartesian: point))
         }
         mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
         mbl_mw_acc_start(self.sensor!.board)
+        mbl_mw_datasignal_read(signal)
      }
     
     func startGyroData() {
@@ -212,30 +203,30 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        
-        mbl_mw_datasignal_subscribe(signal, observer) { observer, data in
+        self.gyroData.clearStreamed(newKind: .cartesianXYZ)
+        mbl_mw_datasignal_subscribe(self.gyroSignal, observer) { observer, data in
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
             mySelf.gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
             print("Swift: gyro: " + mySelf.gyroStr)
-            do {
-                try mySelf.gyroStr.appendToURL(fileURL: mySelf.gryoFileURL)
-            }
-            catch let error {
-                print("Swift: Error while appending to gryo data file: ")
-                print(error.localizedDescription)
-            }
-            if !mySelf.gryoDataReceived
-            {
-                print("Swift: received accel data from sensor!")
-                mySelf.gryoDataReceived = true
-                if (mySelf.accelDataReceived)
-                {
-                    mySelf.notifyListeners("dataReceived", data: nil)
-                }
-            }
-            let point = (data!.pointee.epoch, obj)
-            mySelf.gyroData.stream.append(.init(cartesian: point))
+//            do {
+//                try mySelf.gyroStr.appendToURL(fileURL: mySelf.gryoFileURL)
+//            }
+//            catch let error {
+//                print("Swift: Error while appending to gryo data file: ")
+//                print(error.localizedDescription)
+//            }
+//            if !mySelf.gryoDataReceived
+//            {
+//                print("Swift: received accel data from sensor!")
+//                mySelf.gryoDataReceived = true
+//                if (mySelf.accelDataReceived)
+//                {
+//                    mySelf.notifyListeners("dataReceived", data: nil)
+//                }
+//            }
+//            let point = (data!.pointee.epoch, obj)
+//            mySelf.gyroData.stream.append(.init(cartesian: point))
         }
         mbl_mw_gyro_bmi160_enable_rotation_sampling(self.sensor!.board)
         mbl_mw_gyro_bmi160_start(self.sensor!.board)
@@ -256,14 +247,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         self.gryoDataReceived = false
     }
     
-    func exportAccel() {
-        accelData.exportStreamData(filePrefix: "Acc")
-        { [weak self] in
-        }
-        completion:
-        { [weak self] result in
-        }
-    }
+//    func exportAccel() {
+//        accelData.exportStreamData(filePrefix: "Acc")
+//        { [weak self] in
+//        }
+//        completion:
+//        { [weak self] result in
+//        }
+//    }
 }
 
 extension String {
