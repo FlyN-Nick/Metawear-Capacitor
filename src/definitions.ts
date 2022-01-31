@@ -4,5 +4,7 @@ export interface MetawearCapacitorPlugin {
 	createDataFiles(): Promise<{ successful: boolean; }>;
 	eraseDataFiles(): Promise<null>;
 	startData(): Promise<null>;
+	startAccelData(): Promise<null>;
+	startGyroData(): Promise<null>;
 	stopData(): Promise<null>;
 }

@@ -108,7 +108,20 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     @objc func startData(_ call: CAPPluginCall) {
         print("Swift: StartData called.")
         self.startGyroData()
-        //self.startAccelData()
+        self.startAccelData()
+        call.resolve()
+    }
+    
+    @objc func startAccelData(_ call: CAPPluginCall) {
+        print("Swift: StartData called.")
+        self.startAccelData()
+        call.resolve()
+    }
+    
+    @objc func startGyroData(_ call: CAPPluginCall) {
+        print("Swift: StartData called.")
+        self.startGyroData()
+        self.startAccelData()
         call.resolve()
     }
     
@@ -169,6 +182,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
             mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
             print("Swift: accel: " + mySelf.accelStr)
+            mySelf.notifyListeners("accelData", data: ["x": obj.x, "y": obj.y, "z": obj.z])
 //            do {
 //                try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
 //            }

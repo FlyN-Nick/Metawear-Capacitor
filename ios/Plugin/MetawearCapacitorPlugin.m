@@ -10,5 +10,7 @@ CAP_PLUGIN(MetawearCapacitorPlugin, "MetawearCapacitor",
            CAP_PLUGIN_METHOD(createDataFiles, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(eraseDataFiles, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(startData, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(startAccelData, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(startGyroData, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(stopData, CAPPluginReturnPromise);
 )

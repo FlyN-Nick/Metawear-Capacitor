@@ -5,6 +5,12 @@ import type { MetawearCapacitorPlugin } from './definitions';
 export class MetawearCapacitorWeb
 	extends WebPlugin
 	implements MetawearCapacitorPlugin {
+	async startAccelData(): Promise<null> {
+		throw new Error('Method not implemented.');
+	}
+	async startGyroData(): Promise<null> {
+		throw new Error('Method not implemented.');
+	}
 	async createDataFiles(): Promise<{ successful: boolean; }> {
 		throw new Error('Method not implemented.');
 	}

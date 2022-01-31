@@ -18,6 +18,8 @@ npx cap sync
 * [`createDataFiles()`](#createdatafiles)
 * [`eraseDataFiles()`](#erasedatafiles)
 * [`startData()`](#startdata)
+* [`startAccelData()`](#startacceldata)
+* [`startGyroData()`](#startgyrodata)
 * [`stopData()`](#stopdata)
 
 </docgen-index>
@@ -73,6 +75,28 @@ eraseDataFiles() => Promise<null>
 
 ```typescript
 startData() => Promise<null>
+```
+
+**Returns:** <code>Promise&lt;null&gt;</code>
+
+--------------------
+
+
+### startAccelData()
+
+```typescript
+startAccelData() => Promise<null>
+```
+
+**Returns:** <code>Promise&lt;null&gt;</code>
+
+--------------------
+
+
+### startGyroData()
+
+```typescript
+startGyroData() => Promise<null>
 ```
 
 **Returns:** <code>Promise&lt;null&gt;</code>
