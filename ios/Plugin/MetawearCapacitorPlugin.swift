@@ -107,8 +107,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     @objc func startData(_ call: CAPPluginCall) {
         print("Swift: StartData called.")
-        self.startAccelData()
         self.startGyroData()
+        self.startAccelData()
         call.resolve()
     }
     
