@@ -25,6 +25,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private final var dataFolderPath = NSHomeDirectory()
     
     private(set) var accelData = MWSensorDataStore()
+    private(set) var gyroData = MWSensorDataStore()
     
     
     @objc func createDataFiles(_ call: CAPPluginCall) {
@@ -191,9 +192,10 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         self.accelData.clearStreamed(newKind: .cartesianXYZ)
         mbl_mw_datasignal_subscribe(signal, Unmanaged.passUnretained(self).toOpaque()) { (context, obj) in
             let acceleration: MblMwCartesianFloat = obj!.pointee.valueAs()
-            print(String(format:"(%f,%f,%f),", acceleration.x, acceleration.y, acceleration.z))
-            let point = (obj!.pointee.epoch, acceleration)
             let _self: MetawearCapacitorPlugin = Unmanaged.fromOpaque(context!).takeUnretainedValue()
+            _self.accelStr = String(format:"(%f,%f,%f),", acceleration.x, acceleration.y, acceleration.z)
+            print("Swift: acel: " + _self.gyroStr)
+            let point = (obj!.pointee.epoch, acceleration)
             _self.accelData.stream.append(.init(cartesian: point))
         }
         mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
@@ -232,6 +234,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                     mySelf.notifyListeners("dataReceived", data: nil)
                 }
             }
+            let point = (data!.pointee.epoch, obj)
+            mySelf.gyroData.stream.append(.init(cartesian: point))
         }
         mbl_mw_gyro_bmi160_enable_rotation_sampling(self.sensor!.board)
         mbl_mw_gyro_bmi160_start(self.sensor!.board)
@@ -264,7 +268,6 @@ public class MetawearCapacitorPlugin: CAPPlugin {
 
 extension String {
     func appendToURL(fileURL: URL) throws {
-        print("Swift: Appending to URL!")
         let data = self.data(using: String.Encoding.utf8)!
         try data.append(fileURL: fileURL)
     }
@@ -272,9 +275,7 @@ extension String {
 
 extension Data {
   func append(fileURL: URL) throws {
-      print("Swift: data.append called!")
       if let fileHandle = FileHandle(forWritingAtPath: fileURL.path) {
-          print("Swift: using filehandle!")
           defer {
               fileHandle.closeFile()
           }
@@ -282,7 +283,6 @@ extension Data {
           fileHandle.write(self)
       }
       else {
-          print("Swift: using write!")
           try write(to: fileURL, options: .atomic)
       }
   }
