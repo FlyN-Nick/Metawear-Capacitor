@@ -2,7 +2,6 @@ import Foundation
 import Capacitor
 import MetaWear
 import MetaWearCpp
-
 /**
     Made by Nicholas Assaderaghi, 2021.
  */
@@ -24,6 +23,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private final let gryoFileURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("gryo.txt")
     private final let accelFileURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("accel.txt")
     private final var dataFolderPath = NSHomeDirectory()
+    
+    private(set) var accelData = MWSensorDataStore()
     
     
     @objc func createDataFiles(_ call: CAPPluginCall) {
@@ -153,39 +154,50 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     func startAccelData() {
         print("Swift: sensor.board:")
         print(self.sensor!.board as Any)
-        let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
+        //let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
+        let signal = mbl_mw_acc_bosch_get_acceleration_data_signal(self.sensor!.board)!
         self.accelSignal = signal
         print("Swift: accel signal:")
         print(signal as Any)
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
-        let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        
-        mbl_mw_datasignal_subscribe(signal, observer) { (observer, data) in
-            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
-            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
-            mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
-            print("Swift: accel: " + mySelf.accelStr)
-            do {
-                try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
-            }
-            catch let error {
-                print("Swift: Error while appending to accel data file: ")
-                print(error.localizedDescription)
-            }
-            if !mySelf.accelDataReceived
-            {
-                print("Swift: received accel data from sensor!")
-                mySelf.accelDataReceived = true
-                if (mySelf.gryoDataReceived)
-                {
-                    mySelf.notifyListeners("dataReceived", data: nil)
-                }
-            }
+//        let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+//
+//        mbl_mw_datasignal_subscribe(signal, observer) { (observer, data) in
+//            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
+//            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
+//            mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
+//            print("Swift: accel: " + mySelf.accelStr)
+//            do {
+//                try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
+//            }
+//            catch let error {
+//                print("Swift: Error while appending to accel data file: ")
+//                print(error.localizedDescription)
+//            }
+//            if !mySelf.accelDataReceived
+//            {
+//                print("Swift: received accel data from sensor!")
+//                mySelf.accelDataReceived = true
+//                if (mySelf.gryoDataReceived)
+//                {
+//                    mySelf.notifyListeners("dataReceived", data: nil)
+//                }
+//            }
+//        }
+//        mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
+//        mbl_mw_acc_start(self.sensor!.board)
+//        mbl_mw_datasignal_read(signal)
+        self.accelData.clearStreamed(newKind: .cartesianXYZ)
+        mbl_mw_datasignal_subscribe(signal, Unmanaged.passUnretained(self).toOpaque()) { (context, obj) in
+            let acceleration: MblMwCartesianFloat = obj!.pointee.valueAs()
+            print(String(format:"(%f,%f,%f),", acceleration.x, acceleration.y, acceleration.z))
+            let point = (obj!.pointee.epoch, acceleration)
+            let _self: MetawearCapacitorPlugin = Unmanaged.fromOpaque(context!).takeUnretainedValue()
+            _self.accelData.stream.append(.init(cartesian: point))
         }
         mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
         mbl_mw_acc_start(self.sensor!.board)
-        mbl_mw_datasignal_read(signal)
      }
     
     func startGyroData() {
@@ -238,6 +250,15 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_gyro_bmi160_disable_rotation_sampling(self.sensor!.board)
         mbl_mw_datasignal_unsubscribe(self.gyroSignal!)
         self.gryoDataReceived = false
+    }
+    
+    func exportAccel() {
+        accelData.exportStreamData(filePrefix: "Acc")
+        { [weak self] in
+        }
+        completion:
+        { [weak self] result in
+        }
     }
 }
 

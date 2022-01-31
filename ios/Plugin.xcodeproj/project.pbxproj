@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01917CEA27A765AD00D78C21 /* Bridging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01917CE927A765AD00D78C21 /* Bridging.swift */; };
+		01917CEC27A77BF200D78C21 /* MWSensorDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01917CEB27A77BF200D78C21 /* MWSensorDataStore.swift */; };
+		01917CEE27A77C4B00D78C21 /* DataPointModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01917CED27A77C4B00D78C21 /* DataPointModels.swift */; };
+		01917CF027A77C8300D78C21 /* DataStreamStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01917CEF27A77C8300D78C21 /* DataStreamStats.swift */; };
+		01917CF227A77CF000D78C21 /* AlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01917CF127A77CF000D78C21 /* AlertPresenter.swift */; };
 		01F71E40279F8ECC00120EC4 /* MetaWearDeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F71E3F279F8ECC00120EC4 /* MetaWearDeviceModel.swift */; };
 		01F71E42279F8F6500120EC4 /* SignalLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F71E41279F8F6500120EC4 /* SignalLevel.swift */; };
 		03FC29A292ACC40490383A1F /* Pods_Plugin.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B2A61DA5A1F2DD4F959604D /* Pods_Plugin.framework */; };
@@ -30,6 +35,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		01917CE927A765AD00D78C21 /* Bridging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bridging.swift; sourceTree = "<group>"; };
+		01917CEB27A77BF200D78C21 /* MWSensorDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MWSensorDataStore.swift; sourceTree = "<group>"; };
+		01917CED27A77C4B00D78C21 /* DataPointModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPointModels.swift; sourceTree = "<group>"; };
+		01917CEF27A77C8300D78C21 /* DataStreamStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStreamStats.swift; sourceTree = "<group>"; };
+		01917CF127A77CF000D78C21 /* AlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenter.swift; sourceTree = "<group>"; };
 		01F71E3F279F8ECC00120EC4 /* MetaWearDeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetaWearDeviceModel.swift; sourceTree = "<group>"; };
 		01F71E41279F8F6500120EC4 /* SignalLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalLevel.swift; sourceTree = "<group>"; };
 		3B2A61DA5A1F2DD4F959604D /* Pods_Plugin.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Plugin.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -100,6 +110,11 @@
 				50ADFF8C201F53D600D50D53 /* Info.plist */,
 				01F71E3F279F8ECC00120EC4 /* MetaWearDeviceModel.swift */,
 				01F71E41279F8F6500120EC4 /* SignalLevel.swift */,
+				01917CE927A765AD00D78C21 /* Bridging.swift */,
+				01917CEB27A77BF200D78C21 /* MWSensorDataStore.swift */,
+				01917CED27A77C4B00D78C21 /* DataPointModels.swift */,
+				01917CEF27A77C8300D78C21 /* DataStreamStats.swift */,
+				01917CF127A77CF000D78C21 /* AlertPresenter.swift */,
 			);
 			path = Plugin;
 			sourceTree = "<group>";
@@ -317,8 +332,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01917CEA27A765AD00D78C21 /* Bridging.swift in Sources */,
+				01917CEC27A77BF200D78C21 /* MWSensorDataStore.swift in Sources */,
+				01917CEE27A77C4B00D78C21 /* DataPointModels.swift in Sources */,
 				01F71E42279F8F6500120EC4 /* SignalLevel.swift in Sources */,
 				50E1A94820377CB70090CE1A /* MetawearCapacitorPlugin.swift in Sources */,
+				01917CF227A77CF000D78C21 /* AlertPresenter.swift in Sources */,
+				01917CF027A77C8300D78C21 /* DataStreamStats.swift in Sources */,
 				50ADFFA82020EE4F00D50D53 /* MetawearCapacitorPlugin.m in Sources */,
 				01F71E40279F8ECC00120EC4 /* MetaWearDeviceModel.swift in Sources */,
 			);
