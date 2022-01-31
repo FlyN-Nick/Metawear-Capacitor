@@ -156,7 +156,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         print("Swift: sensor.board:")
         print(self.sensor!.board as Any)
         //let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
-        let signal = mbl_mw_acc_bosch_get_acceleration_data_signal(self.sensor!.board)!
+        let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
         self.accelSignal = signal
         print("Swift: accel signal:")
         print(signal as Any)
