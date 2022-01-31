@@ -1,10 +1,12 @@
+/**
+    Made by Nicholas Assaderaghi for Kyntic, 2021.
+*/
+
 import Foundation
 import Capacitor
 import MetaWear
 import MetaWearCpp
-/**
-    Made by Nicholas Assaderaghi, 2021.
- */
+
 @objc(MetawearCapacitorPlugin)
 public class MetawearCapacitorPlugin: CAPPlugin {
     
@@ -29,14 +31,6 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     
     @objc func createDataFiles(_ call: CAPPluginCall) {
-        //NSSearchPathForDirectoriesInDomains()
-        
-        // this currently is unsuccessful
-//        var unsuccessful = !FileManager.default.createFile(atPath: self.accelFilePath, contents: nil, attributes: nil)
-//        unsuccessful = !FileManager.default.createFile(atPath: self.gryoFilePath, contents: nil, attributes: nil) ||  unsuccessful
-//        print("Swift: success of creating data files:")
-//        print(!unsuccessful)
-        
         // this successfully creates the directory
         do {
             print("Swift: trying to create data directory.")
@@ -59,22 +53,6 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             print(error.localizedDescription)
             call.resolve(["successful": false])
         }
-        
-
-//        // this tries to write to system, unsuccessfully of course
-//        do {
-//            let data = "test".data(using: String.Encoding.utf8)
-//            print("Swift: data:")
-//            print(data as Any)
-//            try data!.write(to: URL(fileURLWithPath: "/gryo.txt"))
-//            try data!.write(to: URL(fileURLWithPath: "/accel.txt"))
-//        }
-//        catch let error {
-//            print("Swift: Error while hail mary: ")
-//            print(error.localizedDescription)
-//        }
-        
-//        call.resolve(["successful": !unsuccessful])
     }
     
     @objc func eraseDataFiles(_ call: CAPPluginCall) {
@@ -113,15 +91,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     }
     
     @objc func startAccelData(_ call: CAPPluginCall) {
-        print("Swift: StartData called.")
+        print("Swift: StartAccelData called.")
         self.startAccelData()
         call.resolve()
     }
     
     @objc func startGyroData(_ call: CAPPluginCall) {
-        print("Swift: StartData called.")
+        print("Swift: StartGyroData called.")
         self.startGyroData()
-        self.startAccelData()
         call.resolve()
     }
     
@@ -139,26 +116,25 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             return
         }
         MetaWearScanner.shared.startScan(allowDuplicates: true) { (device) in
-            // We found a MetaWear board, see if it is close
-            // Hooray! We found a MetaWear board, so stop scanning for more
-            MetaWearScanner.shared.stopScan()
+            // sensor found
+            MetaWearScanner.shared.stopScan() // stop searching for the sensor
             // Connect to the board we found
             device.connectAndSetup().continueWith { t in
                 if let error = t.error {
-                    // Sorry we couldn't connect
+                    // Error while trying to connect
                     print("Swift: Device found, but could not be connected to: ")
                     print(error)
                     self.notifyListeners("unsuccessfulConnection", data: ["error": error])
                 } else {
                     print("Swift: Device successfully connected to!")
                     self.sensor = device // so we can use it in the future
-                    self.notifyListeners("successfulConnection", data: nil)
+                    self.notifyListeners("successfulConnection", data: nil) // so js can respond to sensor connecting
                     
-                    // Hooray! We connected to a MetaWear board, so flash its LED!
+                    // Flash sensor LED blue to indicate successful connection
                     var pattern = MblMwLedPattern()
                     mbl_mw_led_load_preset_pattern(&pattern, MBL_MW_LED_PRESET_PULSE)
                     mbl_mw_led_stop_and_clear(device.board)
-                    mbl_mw_led_write_pattern(device.board, &pattern, MBL_MW_LED_COLOR_GREEN)
+                    mbl_mw_led_write_pattern(device.board, &pattern, MBL_MW_LED_COLOR_BLUE)
                     mbl_mw_led_play(device.board)
                 }
             }
@@ -166,23 +142,19 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     }
     
     func startAccelData() {
-        print("Swift: sensor.board:")
-        print(self.sensor!.board as Any)
-        //let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
+        // get signal
         let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
         self.accelSignal = signal
-        print("Swift: accel signal:")
-        print(signal as Any)
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        self.accelData.clearStreamed(newKind: .cartesianXYZ)
+        // self.accelData.clearStreamed(newKind: .cartesianXYZ) // clear data stream
         mbl_mw_datasignal_subscribe(self.accelSignal, observer) { (observer, data) in
-            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
-            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
+            let obj: MblMwCartesianFloat = data!.pointee.valueAs() // convert to tuple of floats
+            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
             mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
-            print("Swift: accel: " + mySelf.accelStr)
-            mySelf.notifyListeners("accelData", data: ["x": obj.x, "y": obj.y, "z": obj.z])
+            print("Swift: accel: " + mySelf.accelStr) // print accel data to console
+            mySelf.notifyListeners("accelData", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give accel data to js
 //            do {
 //                try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
 //            }
@@ -217,13 +189,13 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        self.gyroData.clearStreamed(newKind: .cartesianXYZ)
+        // self.gyroData.clearStreamed(newKind: .cartesianXYZ) // clear data stream
         mbl_mw_datasignal_subscribe(self.gyroSignal, observer) { observer, data in
-            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
-            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
+            let obj: MblMwCartesianFloat = data!.pointee.valueAs() // convert to tuple of floats
+            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
             mySelf.gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
-            print("Swift: gyro: " + mySelf.gyroStr)
-            mySelf.notifyListeners("gyroData", data: ["x": obj.x, "y": obj.y, "z": obj.z])
+            print("Swift: gyro: " + mySelf.gyroStr) // print gyro data to console
+            mySelf.notifyListeners("gyroData", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give gyro data to js
 //            do {
 //                try mySelf.gyroStr.appendToURL(fileURL: mySelf.gryoFileURL)
 //            }
@@ -264,6 +236,15 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
 //    func exportAccel() {
 //        accelData.exportStreamData(filePrefix: "Acc")
+//        { [weak self] in
+//        }
+//        completion:
+//        { [weak self] result in
+//        }
+//    }
+//
+//    func exportGyro() {
+//        gyroData.exportStreamData(filePrefix: "Gyro")
 //        { [weak self] in
 //        }
 //        completion:

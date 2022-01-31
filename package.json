@@ -1,6 +1,6 @@
 {
   "name": "metawear-capacitor",
-  "version": "0.2.11",
+  "version": "0.3.0",
   "description": "Capacitor plugin for metawear's swift sdk.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
