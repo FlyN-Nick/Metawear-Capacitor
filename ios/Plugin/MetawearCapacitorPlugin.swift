@@ -1,5 +1,5 @@
 /**
-    Made by Nicholas Assaderaghi for Kyntic, 2021.
+    Made by Nicholas Assaderaghi for Kyntic, 2022.
 */
 
 import Foundation
@@ -28,48 +28,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     private(set) var accelData = MWSensorDataStore()
     private(set) var gyroData = MWSensorDataStore()
-    
-    
-    @objc func createDataFiles(_ call: CAPPluginCall) {
-        // this successfully creates the directory
-        do {
-            print("Swift: trying to create data directory.")
-            try FileManager.default.createDirectory(atPath: dataFolderPath, withIntermediateDirectories: true)
-        }
-        catch let error {
-            print("Swift: Error while trying to create directory: ")
-            print(error.localizedDescription)
-        }
-        
-        // it isn't erroring right now :D
-        do {
-            let data = "DATA: ".data(using: String.Encoding.utf8)
-            try data!.write(to: self.accelFileURL)
-            try data!.write(to: self.gryoFileURL)
-            call.resolve(["successful": true])
-        }
-        catch let error {
-            print("Swift: Error while trying to write to files: ")
-            print(error.localizedDescription)
-            call.resolve(["successful": false])
-        }
-    }
-    
-    @objc func eraseDataFiles(_ call: CAPPluginCall) {
-        var errored = false
-        do {
-            let text = ""
-            try text.write(to: self.accelFileURL, atomically: false, encoding: String.Encoding.utf8)
-            try text.write(to: self.gryoFileURL, atomically: false, encoding: String.Encoding.utf8)
-        }
-        catch let error {
-            errored = true
-            print("Swift: Error while erasing data files: ")
-            print(error.localizedDescription)
-            call.reject(error.localizedDescription)
-        }
-        if !errored { call.resolve() }
-    }
+
     
     @objc func connect(_ call: CAPPluginCall) {
         print("Swift: Connect called.")
@@ -80,6 +39,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     @objc func disconnect(_ call: CAPPluginCall) {
         print("Swift: Disconnect called.")
         self.sensor!.cancelConnection()
+        self.sensor = nil
         call.resolve()
     }
     
@@ -110,6 +70,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     }
     
     func connect() {
+        print("Swift: time to connect!")
         if sensor != nil
         {
             self.notifyListeners("successfulConnection", data: nil)
