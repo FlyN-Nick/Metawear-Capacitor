@@ -107,18 +107,18 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         
         // start log
-        mbl_mw_datasignal_log(self.accelSignal, observer) { context,
-            logger in
+        mbl_mw_datasignal_log(self.accelSignal, observer) { observer, logger in
                 // callback for starting log, gives us info about the log
                 let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
                 let cString = mbl_mw_logger_generate_identifier(logger)!
                 let identifier = String(cString: cString)
+                print("Swift: Accel Log ID: \(identifier)")
                 mySelf.notifyListeners("accelLogID", data: ["ID": identifier])
             }
         mbl_mw_logging_start(self.sensor!.board, 0)
 
         // subscribe to data stream
-        mbl_mw_datasignal_subscribe(self.accelSignal, observer) { (observer, data) in
+        mbl_mw_datasignal_subscribe(self.accelSignal, observer) { observer, data in
             // callback for each datapoint we get
             let obj: MblMwCartesianFloat = data!.pointee.valueAs() // convert to tuple of floats
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
@@ -141,12 +141,12 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         
         // start log
-        mbl_mw_datasignal_log(self.gyroSignal, observer) { context,
-            logger in
+        mbl_mw_datasignal_log(self.gyroSignal, observer) { observer, logger in
                 // callback for starting log, gives us info about the log
                 let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
                 let cString = mbl_mw_logger_generate_identifier(logger)!
                 let identifier = String(cString: cString)
+                print("Swift: Gyro Log ID: \(identifier)")
                 mySelf.notifyListeners("gyroLogID", data: ["ID": identifier])
             }
         mbl_mw_logging_start(self.sensor!.board, 0)
@@ -168,8 +168,9 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     /**Given log ID, download log data.**/
     func getLogData(ID: String) {
-        let log = mbl_mw_logger_lookup_id(self.sensor!.board, ID)
-        // needs to be implemented 
+        let log = mbl_mw_logger_lookup_id(self.sensor!.board, UInt8(Int(ID)!))
+        print("Yo here's the pointer to the log object: \(String(describing: log))")
+        // needs to be implemented
     }
     
     func stopAccelData() {
