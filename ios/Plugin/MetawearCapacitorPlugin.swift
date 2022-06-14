@@ -1,5 +1,5 @@
 /**
-    Made by Nicholas Assaderaghi for Kyntic, 2022.
+    Made by Nicholas Assaderaghi for Kyntic, 2021-2022.
 */
 
 import Foundation
@@ -18,14 +18,9 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private var accelStr: String = ""
     private var gyroStr: String = ""
     
-    
     private var accelDataReceived = false
     private var gryoDataReceived = false
-    
-    private final let gryoFileURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("gryo.txt")
-    private final let accelFileURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("accel.txt")
-    private final var dataFolderPath = NSHomeDirectory()
-    
+        
     private(set) var accelData = MWSensorDataStore()
     private(set) var gyroData = MWSensorDataStore()
 
@@ -102,6 +97,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         }
     }
     
+    /**Start acceleration data stream and start logging acceleration data on-board.*/
     func startAccelData() {
         // get signal
         let signal = mbl_mw_acc_get_acceleration_data_signal(self.sensor!.board)
@@ -109,70 +105,71 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        // self.accelData.clearStreamed(newKind: .cartesianXYZ) // clear data stream
+        
+        // start log
+        mbl_mw_datasignal_log(self.accelSignal, observer) { context,
+            logger in
+                // callback for starting log, gives us info about the log
+                let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
+                let cString = mbl_mw_logger_generate_identifier(logger)!
+                let identifier = String(cString: cString)
+                mySelf.notifyListeners("accelLogID", data: ["ID": identifier])
+            }
+        mbl_mw_logging_start(self.sensor!.board, 0)
+
+        // subscribe to data stream
         mbl_mw_datasignal_subscribe(self.accelSignal, observer) { (observer, data) in
+            // callback for each datapoint we get
             let obj: MblMwCartesianFloat = data!.pointee.valueAs() // convert to tuple of floats
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
             mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
             print("Swift: accel: " + mySelf.accelStr) // print accel data to console
             mySelf.notifyListeners("accelData", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give accel data to js
-//            do {
-//                try mySelf.accelStr.appendToURL(fileURL: mySelf.accelFileURL)
-//            }
-//            catch let error {
-//                print("Swift: Error while appending to accel data file: ")
-//                print(error.localizedDescription)
-//            }
-//            if !mySelf.accelDataReceived
-//            {
-//                print("Swift: received accel data from sensor!")
-//                mySelf.accelDataReceived = true
-//                if (mySelf.gryoDataReceived)
-//                {
-//                    mySelf.notifyListeners("dataReceived", data: nil)
-//                }
-//            }
-//            let point = (data!.pointee.epoch, obj)
-//            mySelf.accelData.stream.append(.init(cartesian: point))
         }
+        
+        // turn on accel on sensor
         mbl_mw_acc_enable_acceleration_sampling(self.sensor!.board)
         mbl_mw_acc_start(self.sensor!.board)
      }
     
+    /**Start gyroscope data stream and start logging gyroscope data on-board.*/
     func startGyroData() {
         let signal = mbl_mw_gyro_bmi160_get_rotation_data_signal(self.sensor!.board)
         self.gyroSignal = signal
         
         // https://stackoverflow.com/questions/33260808/how-to-use-instance-method-as-callback-for-function-which-takes-only-func-or-lit
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        // self.gyroData.clearStreamed(newKind: .cartesianXYZ) // clear data stream
+        
+        // start log
+        mbl_mw_datasignal_log(self.gyroSignal, observer) { context,
+            logger in
+                // callback for starting log, gives us info about the log
+                let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
+                let cString = mbl_mw_logger_generate_identifier(logger)!
+                let identifier = String(cString: cString)
+                mySelf.notifyListeners("gyroLogID", data: ["ID": identifier])
+            }
+        mbl_mw_logging_start(self.sensor!.board, 0)
+        
+        // subscribe to data stream
         mbl_mw_datasignal_subscribe(self.gyroSignal, observer) { observer, data in
+            // callback for each datapoint we get
             let obj: MblMwCartesianFloat = data!.pointee.valueAs() // convert to tuple of floats
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
             mySelf.gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
             print("Swift: gyro: " + mySelf.gyroStr) // print gyro data to console
             mySelf.notifyListeners("gyroData", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give gyro data to js
-//            do {
-//                try mySelf.gyroStr.appendToURL(fileURL: mySelf.gryoFileURL)
-//            }
-//            catch let error {
-//                print("Swift: Error while appending to gryo data file: ")
-//                print(error.localizedDescription)
-//            }
-//            if !mySelf.gryoDataReceived
-//            {
-//                print("Swift: received accel data from sensor!")
-//                mySelf.gryoDataReceived = true
-//                if (mySelf.accelDataReceived)
-//                {
-//                    mySelf.notifyListeners("dataReceived", data: nil)
-//                }
-//            }
-//            let point = (data!.pointee.epoch, obj)
-//            mySelf.gyroData.stream.append(.init(cartesian: point))
         }
+        
+        // turn on gyro on sensor
         mbl_mw_gyro_bmi160_enable_rotation_sampling(self.sensor!.board)
         mbl_mw_gyro_bmi160_start(self.sensor!.board)
+    }
+    
+    /**Given log ID, download log data.**/
+    func getLogData(ID: String) {
+        let log = mbl_mw_logger_lookup_id(self.sensor!.board, ID)
+        // needs to be implemented 
     }
     
     func stopAccelData() {
@@ -188,44 +185,4 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_datasignal_unsubscribe(self.gyroSignal!)
         self.gryoDataReceived = false
     }
-    
-//    func exportAccel() {
-//        accelData.exportStreamData(filePrefix: "Acc")
-//        { [weak self] in
-//        }
-//        completion:
-//        { [weak self] result in
-//        }
-//    }
-//
-//    func exportGyro() {
-//        gyroData.exportStreamData(filePrefix: "Gyro")
-//        { [weak self] in
-//        }
-//        completion:
-//        { [weak self] result in
-//        }
-//    }
-}
-
-extension String {
-    func appendToURL(fileURL: URL) throws {
-        let data = self.data(using: String.Encoding.utf8)!
-        try data.append(fileURL: fileURL)
-    }
- }
-
-extension Data {
-  func append(fileURL: URL) throws {
-      if let fileHandle = FileHandle(forWritingAtPath: fileURL.path) {
-          defer {
-              fileHandle.closeFile()
-          }
-          fileHandle.seekToEndOfFile()
-          fileHandle.write(self)
-      }
-      else {
-          try write(to: fileURL, options: .atomic)
-      }
-  }
 }

@@ -11,12 +11,6 @@ export class MetawearCapacitorWeb
 	async startGyroData(): Promise<null> {
 		throw new Error('Method not implemented.');
 	}
-	async createDataFiles(): Promise<{ successful: boolean; }> {
-		throw new Error('Method not implemented.');
-	}
-	async eraseDataFiles(): Promise<null> {
-		throw new Error('Method not implemented.');
-	}
 	async startData(): Promise<null> {
 		throw new Error('Method not implemented.');
 	}
@@ -27,6 +21,9 @@ export class MetawearCapacitorWeb
 		throw new Error('Method not implemented.');
 	}
 	async disconnect(): Promise<null> {
+		throw new Error('Method not implemented.');
+	}
+	async downloadData(ID: String): Promise<null> {
 		throw new Error('Method not implemented.');
 	}
 }

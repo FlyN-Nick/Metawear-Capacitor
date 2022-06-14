@@ -8,23 +8,35 @@ export interface MetawearCapacitorPlugin {
 	 */
 	disconnect(): Promise<null>;
 	/**
-	 * Start accel and gryo data collection.
+	 * Start accel and gryo data streaming and on-board logging.
 	 */
 	startData(): Promise<null>;
 	/**
-	 * Start listening to accel data. 
+	 * Start accel data streaming and on-board logging. 
+	 * 
+	 * Listen in JS for the logging ID with:
+	 * MetawearCapacitor.addListener('accelLogID', (logID) -> { ... });
+	 * 
 	 * Listen in JS with:
 	 * MetawearCapacitor.addListener('accelData', (accel) => { ... });
 	 */
 	startAccelData(): Promise<null>;
 	/**
-	 * Start listening to gyro data. 
-	 * Listen in JS with:
+	 * Start gyro data streaming and on-board logging.
+	 * 
+	 * Listen in JS for the logging ID with:
+	 * MetawearCapacitor.addListener('gyroLogID', (logID) -> { ... });
+	 * 
+	 * Listen in JS for data stream with:
 	 * MetawearCapacitor.addListener('gyroData', (gyro) => { ... });
 	 */
 	startGyroData(): Promise<null>;
 	/**
-	 * Stop listening to both accel and gyro data.
+	 * Stop data streaming and on-board logging.
 	 */
 	stopData(): Promise<null>;
+	/**
+	 * Downloads the log data from the metawear sensor.
+	 */
+	downloadData(ID: String): Promise<null>;
 }
