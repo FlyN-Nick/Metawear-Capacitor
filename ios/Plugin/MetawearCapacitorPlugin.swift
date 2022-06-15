@@ -111,9 +111,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 // callback for starting log, gives us info about the log
                 let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
                 let cString = mbl_mw_logger_generate_identifier(logger)!
+                // the identifier is always "acceleration"
                 let identifier = String(cString: cString)
                 print("Swift: Accel Log ID: \(identifier)")
-                mySelf.notifyListeners("accelLogID", data: ["ID": identifier])
+                let timestamp = NSDate().timeIntervalSince1970
+                mySelf.notifyListeners("accelLogID", data: ["ID": identifier, "time": timestamp])
             }
         mbl_mw_logging_start(self.sensor!.board, 0)
 
@@ -145,9 +147,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                 // callback for starting log, gives us info about the log
                 let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
                 let cString = mbl_mw_logger_generate_identifier(logger)!
+                // the identifier is always "angular-velocity"
                 let identifier = String(cString: cString)
                 print("Swift: Gyro Log ID: \(identifier)")
-                mySelf.notifyListeners("gyroLogID", data: ["ID": identifier])
+                let timestamp = NSDate().timeIntervalSince1970
+                mySelf.notifyListeners("gyroLogID", data: ["ID": identifier, "time": timestamp])
             }
         mbl_mw_logging_start(self.sensor!.board, 0)
         
