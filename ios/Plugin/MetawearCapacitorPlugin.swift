@@ -68,7 +68,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         print("Swift: time to connect!")
         if sensor != nil
         {
-            self.notifyListeners("successfulConnection", data: nil)
+            self.notifyListeners("successfulConnection", data: nil) // JS is being silly, we are already connected :D
             return
         }
         MetaWearScanner.shared.startScan(allowDuplicates: true) { (device) in
@@ -187,14 +187,14 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         }
         
         var handlers = MblMwLogDownloadHandler()
-        handlers.context = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        handlers.context = observer
         handlers.received_progress_update = { (observer, remainingEntries, totalEntries) in
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
             let progress = Double(totalEntries - remainingEntries) / Double(totalEntries)
             print("Swift: Log download progress: \(progress)")
             if remainingEntries == 0 {
                 print("Swift: Done downloading log :D")
-                mySelf.notifyListeners("logFinished", data: [:])
+                mySelf.notifyListeners("logFinished\(ID)", data: nil)
             }
         }
         handlers.received_unknown_entry = { (context, id, epoch, data, length) in
