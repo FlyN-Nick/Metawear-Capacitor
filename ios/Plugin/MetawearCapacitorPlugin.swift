@@ -23,6 +23,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         
     private(set) var accelData = MWSensorDataStore()
     private(set) var gyroData = MWSensorDataStore()
+    
+    private var currentLogID: String = ""
 
     
     @objc func connect(_ call: CAPPluginCall) {
@@ -172,6 +174,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     /**Given log IDs, download log data.**/
     func getLogData(ID: String) {
+        self.currentLogID = ID
         let log = mbl_mw_logger_lookup_id(self.sensor!.board, UInt8(Int(ID)!))
         
         print("Swift: Yo here's the pointer to the log object: \(String(describing: log))")
@@ -180,21 +183,22 @@ public class MetawearCapacitorPlugin: CAPPlugin {
 
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
             
-        mbl_mw_logger_subscribe(log, observer) { (observer, data) in
+        mbl_mw_logger_subscribe(log, observer, { (observer, data) in
             let obj: MblMwCartesianFloat = data!.pointee.valueAs()
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
-            mySelf.notifyListeners("logData", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give log data point to js
-        }
+            mySelf.notifyListeners("logData-\(mySelf.currentLogID)", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give log data point to js
+        })
         
         var handlers = MblMwLogDownloadHandler()
-        handlers.context = observer
+        handlers.context = Unmanaged.passRetained(self).toOpaque()
         handlers.received_progress_update = { (observer, remainingEntries, totalEntries) in
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
             let progress = Double(totalEntries - remainingEntries) / Double(totalEntries)
             print("Swift: Log download progress: \(progress)")
             if remainingEntries == 0 {
                 print("Swift: Done downloading log :D")
-                mySelf.notifyListeners("logFinished\(ID)", data: nil)
+                mySelf.notifyListeners("logFinished-\(mySelf.currentLogID)", data: nil)
+                mySelf.currentLogID = ""
             }
         }
         handlers.received_unknown_entry = { (context, id, epoch, data, length) in

@@ -123,7 +123,13 @@ Stop data streaming and on-board logging.
 downloadData(ID: String) => Promise<null>
 ```
 
-Downloads the log data from the metawear sensor.
+Downloads the log data from the metawear sensor, given log ID.
+
+Listen in JS for the log data with:
+MetawearCapacitor.addListener('logData-ID', (logData) -&gt; { ... });
+
+Listen in JS for log finish with:
+MetawearCapacitor.addListener('logFinish-ID', () =&gt; { ... });
 
 | Param    | Type                                      |
 | -------- | ----------------------------------------- |
