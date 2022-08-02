@@ -42,7 +42,7 @@ export interface MetawearCapacitorPlugin {
 	 * MetawearCapacitor.addListener('logData-ID', (logData) -> { ... });
 	 * 
 	 * Listen in JS for log finish with:
-	 * MetawearCapacitor.addListener('logFinish-ID', () => { ... });
+	 * MetawearCapacitor.addListener('logFinished-ID', () => { ... });
 	 */
-	downloadData(ID: String): Promise<null>;
+	downloadData(options: { ID: string }): Promise<null>;
 }

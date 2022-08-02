@@ -66,6 +66,21 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         call.resolve()
     }
     
+    @objc func downloadData(_ call: CAPPluginCall) {
+        print("Swift: DownloadData called.")
+        let ID = call.getString("ID") ?? ""
+        if (ID == "")
+        {
+            print("Swift: Error, getLogData was not provided an ID.")
+            call.reject("No log ID provided.")
+        }
+        else
+        {
+            self.getLogData(ID: ID)
+            call.resolve()
+        }
+    }
+    
     func connect() {
         print("Swift: time to connect!")
         if sensor != nil
