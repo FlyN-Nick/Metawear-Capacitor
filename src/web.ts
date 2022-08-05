@@ -23,7 +23,7 @@ export class MetawearCapacitorWeb
 	async disconnect(): Promise<null> {
 		throw new Error('Method not implemented.');
 	}
-	async downloadData(options: {ID: string}): Promise<null> {
+	async downloadData(): Promise<null> {
 		throw new Error('Method not implemented.');
 	}
 }

@@ -15,16 +15,10 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     private var accelSignal: OpaquePointer? = nil
     private var gyroSignal: OpaquePointer? = nil
     
-    private var accelStr: String = ""
-    private var gyroStr: String = ""
-    
-    private var accelDataReceived = false
-    private var gryoDataReceived = false
-        
-    private(set) var accelData = MWSensorDataStore()
-    private(set) var gyroData = MWSensorDataStore()
-    
     private var currentLogID: String = ""
+    
+    private var finishedDownloadingGyro = false
+    private var finishedDownloadingAccel = false
 
     
     @objc func connect(_ call: CAPPluginCall) {
@@ -68,17 +62,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     @objc func downloadData(_ call: CAPPluginCall) {
         print("Swift: DownloadData called.")
-        let ID = call.getString("ID") ?? ""
-        if (ID == "")
-        {
-            print("Swift: Error, getLogData was not provided an ID.")
-            call.reject("No log ID provided.")
-        }
-        else
-        {
-            self.getLogData(ID: ID)
-            call.resolve()
-        }
+        self.newGetLogData()
+        call.resolve()
     }
     
     func connect() {
@@ -127,10 +112,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_datasignal_log(self.accelSignal, observer) { observer, logger in
                 // callback for starting log, gives us info about the log
                 let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
+                print("Swift: Accel Log Num ID: \(mbl_mw_logger_get_id(logger))")
                 let cString = mbl_mw_logger_generate_identifier(logger)!
                 // the identifier is always "acceleration"
                 let identifier = String(cString: cString)
-                print("Swift: Accel Log ID: \(identifier)")
+                print("Swift: Accel Log String ID: \(identifier)")
                 let timestamp = NSDate().timeIntervalSince1970
                 mySelf.notifyListeners("accelLogID", data: ["ID": identifier, "time": timestamp])
             }
@@ -141,8 +127,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             // callback for each datapoint we get
             let obj: MblMwCartesianFloat = data!.pointee.valueAs() // convert to tuple of floats
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
-            mySelf.accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
-            print("Swift: accel: " + mySelf.accelStr) // print accel data to console
+            let accelStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
+            print("Swift: accel: " + accelStr) // print accel data to console
             mySelf.notifyListeners("accelData", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give accel data to js
         }
         
@@ -163,10 +149,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_datasignal_log(self.gyroSignal, observer) { observer, logger in
                 // callback for starting log, gives us info about the log
                 let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
+                print("Swift: Gyro Log Num ID: \(mbl_mw_logger_get_id(logger))")
                 let cString = mbl_mw_logger_generate_identifier(logger)!
                 // the identifier is always "angular-velocity"
                 let identifier = String(cString: cString)
-                print("Swift: Gyro Log ID: \(identifier)")
+                print("Swift: Gyro Log String ID: \(identifier)")
                 let timestamp = NSDate().timeIntervalSince1970
                 mySelf.notifyListeners("gyroLogID", data: ["ID": identifier, "time": timestamp])
             }
@@ -177,8 +164,8 @@ public class MetawearCapacitorPlugin: CAPPlugin {
             // callback for each datapoint we get
             let obj: MblMwCartesianFloat = data!.pointee.valueAs() // convert to tuple of floats
             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
-            mySelf.gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
-            print("Swift: gyro: " + mySelf.gyroStr) // print gyro data to console
+            let gyroStr = String(format:"(%f,%f,%f),", obj.x, obj.y, obj.z)
+            print("Swift: gyro: " + gyroStr) // print gyro data to console
             mySelf.notifyListeners("gyroData", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give gyro data to js
         }
         
@@ -187,55 +174,110 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_gyro_bmi160_start(self.sensor!.board)
     }
     
-    /**Given log IDs, download log data.**/
-    func getLogData(ID: String) {
-        self.currentLogID = ID
-        let log = mbl_mw_logger_lookup_id(self.sensor!.board, UInt8(Int(ID)!))
-        
-        print("Swift: Yo here's the pointer to the log object: \(String(describing: log))")
-        
-        mbl_mw_logging_stop(self.sensor!.board)
-
+    /** Download 1 log off of device. */
+    func newGetLogData() {
         let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-            
-        mbl_mw_logger_subscribe(log, observer, { (observer, data) in
-            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
-            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
-            mySelf.notifyListeners("logData-\(mySelf.currentLogID)", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give log data point to js
-        })
-        
-        var handlers = MblMwLogDownloadHandler()
-        handlers.context = Unmanaged.passRetained(self).toOpaque()
-        handlers.received_progress_update = { (observer, remainingEntries, totalEntries) in
-            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
-            let progress = Double(totalEntries - remainingEntries) / Double(totalEntries)
-            print("Swift: Log download progress: \(progress)")
-            if remainingEntries == 0 {
-                print("Swift: Done downloading log :D")
-                mySelf.notifyListeners("logFinished-\(mySelf.currentLogID)", data: nil)
-                mySelf.currentLogID = ""
+        mbl_mw_metawearboard_create_anonymous_datasignals(self.sensor!.board, observer) { observer, board, signals, numSignals in
+            print("Swift: number of downloadable logs: \(numSignals)")
+            if numSignals > 0
+            {
+                let buffer = UnsafeBufferPointer(start: signals, count: Int(numSignals));
+                let signalPointersArr = Array(buffer)
+                signalPointersArr.forEach {
+                    let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue()
+                    let cString = mbl_mw_anonymous_datasignal_get_identifier($0)!
+                    let identifier = String(cString: cString)
+                    if (identifier == "angular-velocity" && mySelf.finishedDownloadingGyro == false) || (identifier == "acceleration" && mySelf.finishedDownloadingAccel == false)
+                    {
+                        print("Swift: downloading log \(identifier)")
+                        mySelf.currentLogID = identifier
+                        mbl_mw_anonymous_datasignal_subscribe($0, observer) { context, data in
+                            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
+                            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(context!).takeUnretainedValue()
+                            mySelf.notifyListeners("logData-\(mySelf.currentLogID)", data: ["x": obj.x, "y": obj.y, "z": obj.z])
+                        }
+                        var handlers = MblMwLogDownloadHandler()
+                        handlers.context = observer
+                        handlers.received_progress_update = { (ctx, remainingEntries, totalEntries) in
+                            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(ctx!).takeUnretainedValue() // get back self
+                            let progress = Double(totalEntries - remainingEntries) / Double(totalEntries)
+                            print("Swift: Log download progress: \(progress)")
+                            if remainingEntries == 0 {
+                                print("Swift: Done downloading log :D")
+                                mySelf.notifyListeners("logFinished-\(mySelf.currentLogID)", data: nil)
+                                if mySelf.currentLogID == "angular-velocity"
+                                {
+                                    mySelf.finishedDownloadingGyro = true
+                                }
+                                else if mySelf.currentLogID == "acceleration"
+                                {
+                                    mySelf.finishedDownloadingAccel = true
+                                }
+                                mySelf.currentLogID = ""
+                            }
+                        }
+                        handlers.received_unknown_entry = { (context, id, epoch, data, length) in
+                            print("Swift: received_unknown_entry when downloading log")
+                        }
+                        handlers.received_unhandled_entry = { (context, data) in
+                            print("Swift: received_unhandled_entry when downloading log")
+                        }
+                        mbl_mw_logging_download(mySelf.sensor!.board, 100, &handlers)
+                    }
+                }
             }
         }
-        handlers.received_unknown_entry = { (context, id, epoch, data, length) in
-            print("Swift: received_unknown_entry when downloading log")
-        }
-        handlers.received_unhandled_entry = { (context, data) in
-            print("Swift: received_unhandled_entry when downloading log")
-        }
-        mbl_mw_logging_download(self.sensor!.board, 100, &handlers)
     }
+    
+    // DEPRECATED, newGetLogData is now used instead.
+    
+//    /**Given log IDs, download log data.**/
+//    func getLogData(ID: String) {
+//        self.currentLogID = ID
+//        let log = mbl_mw_logger_lookup_id(self.sensor!.board, UInt8(Int(ID)!))
+//
+//        print("Swift: Yo here's the pointer to the log object: \(String(describing: log))")
+//
+//        mbl_mw_logging_stop(self.sensor!.board)
+//
+//        let observer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+//
+//        mbl_mw_logger_subscribe(log, observer, { (observer, data) in
+//            let obj: MblMwCartesianFloat = data!.pointee.valueAs()
+//            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
+//            mySelf.notifyListeners("logData-\(mySelf.currentLogID)", data: ["x": obj.x, "y": obj.y, "z": obj.z]) // give log data point to js
+//        })
+//
+//        var handlers = MblMwLogDownloadHandler()
+//        handlers.context = Unmanaged.passRetained(self).toOpaque()
+//        handlers.received_progress_update = { (observer, remainingEntries, totalEntries) in
+//            let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(observer!).takeUnretainedValue() // get back self
+//            let progress = Double(totalEntries - remainingEntries) / Double(totalEntries)
+//            print("Swift: Log download progress: \(progress)")
+//            if remainingEntries == 0 {
+//                print("Swift: Done downloading log :D")
+//                mySelf.notifyListeners("logFinished-\(mySelf.currentLogID)", data: nil)
+//                mySelf.currentLogID = ""
+//            }
+//        }
+//        handlers.received_unknown_entry = { (context, id, epoch, data, length) in
+//            print("Swift: received_unknown_entry when downloading log")
+//        }
+//        handlers.received_unhandled_entry = { (context, data) in
+//            print("Swift: received_unhandled_entry when downloading log")
+//        }
+//        mbl_mw_logging_download(self.sensor!.board, 100, &handlers)
+//    }
     
     func stopAccelData() {
         mbl_mw_acc_stop(self.sensor!.board)
         mbl_mw_acc_disable_acceleration_sampling(self.sensor!.board)
         mbl_mw_datasignal_unsubscribe(self.accelSignal!)
-        self.accelDataReceived = false
     }
     
     func stopGyroData() {
         mbl_mw_gyro_bmi160_stop(self.sensor!.board)
         mbl_mw_gyro_bmi160_disable_rotation_sampling(self.sensor!.board)
         mbl_mw_datasignal_unsubscribe(self.gyroSignal!)
-        self.gryoDataReceived = false
     }
 }

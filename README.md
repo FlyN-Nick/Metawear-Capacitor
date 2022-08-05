@@ -19,7 +19,7 @@ npx cap sync
 * [`startAccelData()`](#startacceldata)
 * [`startGyroData()`](#startgyrodata)
 * [`stopData()`](#stopdata)
-* [`downloadData(...)`](#downloaddata)
+* [`downloadData()`](#downloaddata)
 
 </docgen-index>
 
@@ -116,23 +116,19 @@ Stop data streaming and on-board logging.
 --------------------
 
 
-### downloadData(...)
+### downloadData()
 
 ```typescript
-downloadData(options: { ID: string; }) => Promise<null>
+downloadData() => Promise<null>
 ```
 
-Downloads the log data from the metawear sensor, given log ID.
+Downloads one of the two logs from the metawear sensor.
 
 Listen in JS for the log data with:
 MetawearCapacitor.addListener('logData-ID', (logData) -&gt; { ... });
 
 Listen in JS for log finish with:
 MetawearCapacitor.addListener('logFinished-ID', () =&gt; { ... });
-
-| Param         | Type                         |
-| ------------- | ---------------------------- |
-| **`options`** | <code>{ ID: string; }</code> |
 
 **Returns:** <code>Promise&lt;null&gt;</code>
 

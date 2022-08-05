@@ -36,7 +36,7 @@ export interface MetawearCapacitorPlugin {
 	 */
 	stopData(): Promise<null>;
 	/**
-	 * Downloads the log data from the metawear sensor, given log ID.
+	 * Downloads one of the two logs from the metawear sensor.
 	 * 
 	 * Listen in JS for the log data with:
 	 * MetawearCapacitor.addListener('logData-ID', (logData) -> { ... });
@@ -44,5 +44,5 @@ export interface MetawearCapacitorPlugin {
 	 * Listen in JS for log finish with:
 	 * MetawearCapacitor.addListener('logFinished-ID', () => { ... });
 	 */
-	downloadData(options: { ID: string }): Promise<null>;
+	downloadData(): Promise<null>;
 }
