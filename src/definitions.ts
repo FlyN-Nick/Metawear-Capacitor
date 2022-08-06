@@ -45,4 +45,8 @@ export interface MetawearCapacitorPlugin {
 	 * MetawearCapacitor.addListener('logFinished-ID', () => { ... });
 	 */
 	downloadData(): Promise<null>;
+	/**
+	 * Stop on-board logging.
+	 */
+	stopLogs(): Promise<null>;
 }

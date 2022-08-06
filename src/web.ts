@@ -26,4 +26,7 @@ export class MetawearCapacitorWeb
 	async downloadData(): Promise<null> {
 		throw new Error('Method not implemented.');
 	}
+	async stopLogs(): Promise<null> {
+		throw new Error('Method not implemented.');
+	}
 }

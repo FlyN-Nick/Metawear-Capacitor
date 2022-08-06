@@ -20,6 +20,7 @@ npx cap sync
 * [`startGyroData()`](#startgyrodata)
 * [`stopData()`](#stopdata)
 * [`downloadData()`](#downloaddata)
+* [`stopLogs()`](#stoplogs)
 
 </docgen-index>
 
@@ -129,6 +130,19 @@ MetawearCapacitor.addListener('logData-ID', (logData) -&gt; { ... });
 
 Listen in JS for log finish with:
 MetawearCapacitor.addListener('logFinished-ID', () =&gt; { ... });
+
+**Returns:** <code>Promise&lt;null&gt;</code>
+
+--------------------
+
+
+### stopLogs()
+
+```typescript
+stopLogs() => Promise<null>
+```
+
+Stop on-board logging.
 
 **Returns:** <code>Promise&lt;null&gt;</code>
 

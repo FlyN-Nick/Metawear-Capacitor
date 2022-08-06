@@ -29,8 +29,11 @@ public class MetawearCapacitorPlugin: CAPPlugin {
     
     @objc func disconnect(_ call: CAPPluginCall) {
         print("Swift: Disconnect called.")
-        self.sensor!.cancelConnection()
-        self.sensor = nil
+        if (self.sensor != nil)
+        {
+            self.sensor!.cancelConnection()
+            self.sensor = nil
+        }
         call.resolve()
     }
     
@@ -66,10 +69,17 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         call.resolve()
     }
     
+    @objc func stopLogs(_ call: CAPPluginCall) {
+        print("Swift: StopLogs called.")
+        self.stopLogging()
+        call.resolve()
+    }
+    
     func connect() {
         print("Swift: time to connect!")
         if sensor != nil
         {
+            print("Swift: silly JS, we're already connected!")
             self.notifyListeners("successfulConnection", data: nil) // JS is being silly, we are already connected :D
             return
         }
@@ -222,11 +232,12 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                         handlers.received_unhandled_entry = { (context, data) in
                             print("Swift: received_unhandled_entry when downloading log")
                         }
-                        mbl_mw_logging_download(mySelf.sensor!.board, 100, &handlers)
+                        mbl_mw_logging_download(mySelf.sensor!.board, 255, &handlers)
                     }
                 }
             }
         }
+        print("Swift: made callbacks for downloading logs.")
     }
     
     // DEPRECATED, newGetLogData is now used instead.
@@ -279,5 +290,9 @@ public class MetawearCapacitorPlugin: CAPPlugin {
         mbl_mw_gyro_bmi160_stop(self.sensor!.board)
         mbl_mw_gyro_bmi160_disable_rotation_sampling(self.sensor!.board)
         mbl_mw_datasignal_unsubscribe(self.gyroSignal!)
+    }
+    
+    func stopLogging() {
+        mbl_mw_logging_stop(self.sensor!.board)
     }
 }
