@@ -212,6 +212,7 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                             let mySelf = Unmanaged<MetawearCapacitorPlugin>.fromOpaque(ctx!).takeUnretainedValue() // get back self
                             let progress = Double(totalEntries - remainingEntries) / Double(totalEntries)
                             print("Swift: Log download progress: \(progress)")
+                            mySelf.notifyListeners("logProgress-\(mySelf.currentLogID)", data: ["progress": progress])
                             if remainingEntries == 0 {
                                 print("Swift: Done downloading log :D")
                                 mySelf.notifyListeners("logFinished-\(mySelf.currentLogID)", data: nil)

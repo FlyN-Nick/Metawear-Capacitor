@@ -127,6 +127,11 @@ Downloads one of the two logs from the metawear sensor.
 
 Listen in JS for the log data with:
 MetawearCapacitor.addListener('logData-ID', (logData) -&gt; { ... });
+(logData["x"], logData["y"], logData["z"] are floats.)
+
+Listen in JS for the log progress with:
+MetawearCapacitor.addListener('logProgress-ID', (progress) -&gt; { ... });
+(progress["progress"] is a number between 0 and 1.)
 
 Listen in JS for log finish with:
 MetawearCapacitor.addListener('logFinished-ID', () =&gt; { ... });

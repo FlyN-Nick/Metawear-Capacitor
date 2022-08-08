@@ -40,6 +40,11 @@ export interface MetawearCapacitorPlugin {
 	 * 
 	 * Listen in JS for the log data with:
 	 * MetawearCapacitor.addListener('logData-ID', (logData) -> { ... });
+	 * (logData["x"], logData["y"], logData["z"] are floats.)
+	 * 
+	 * Listen in JS for the log progress with:
+	 * MetawearCapacitor.addListener('logProgress-ID', (progress) -> { ... });
+	 * (progress["progress"] is a number between 0 and 1.)
 	 * 
 	 * Listen in JS for log finish with:
 	 * MetawearCapacitor.addListener('logFinished-ID', () => { ... });
