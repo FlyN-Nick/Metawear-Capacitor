@@ -104,6 +104,9 @@ public class MetawearCapacitorPlugin: CAPPlugin {
                     mbl_mw_led_stop_and_clear(device.board)
                     mbl_mw_led_write_pattern(device.board, &pattern, MBL_MW_LED_COLOR_BLUE)
                     mbl_mw_led_play(device.board)
+                    mbl_mw_settings_set_connection_parameters(device.board, 7.5, 15, 0, 20000); // set the connection interval to extremely small (fast connection for log downloads)
+                    mbl_mw_acc_set_odr(device.board, 25) // accel will sample 25hz
+                    mbl_mw_gyro_bmi160_set_odr(device.board, MBL_MW_GYRO_BOSCH_ODR_25Hz) // gyro will sample 25hz
                 }
             }
         }
