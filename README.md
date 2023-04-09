@@ -2,6 +2,8 @@
 
 Capacitor plugin for metawear's swift sdk.
 
+Used by the open-source app [kyntic](https://github.com/TheEnquirer/kyntic).
+
 ## Install
 
 ```bash
